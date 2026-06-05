@@ -1,6 +1,7 @@
+'use client';
 import Link from 'next/link';
 import { Phone, Mail, MapPin, Instagram, Clock } from 'lucide-react';
-import { contactInfo } from '@/data/mock';
+import { useDataStore } from '@/store/dataStore';
 
 const NAV_LINKS = [
   { href: '/', label: 'Головна' },
@@ -33,6 +34,7 @@ const FlowerLogo = () => (
 );
 
 export default function Footer() {
+  const contactInfo = useDataStore(s => s.contactInfo);
   const currentYear = new Date().getFullYear();
 
   return (

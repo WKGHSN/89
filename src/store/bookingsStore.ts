@@ -14,6 +14,12 @@ interface BookingsStore {
   getMasterBookings: (masterId: string) => Booking[];
   getUpcomingBookings: (userId: string) => Booking[];
   getPastBookings: (userId: string) => Booking[];
+  hasTimeConflict: (masterId: string, date: string, time: string, duration: number, excludeBookingId?: string) => boolean;
+}
+
+function timeToMinutes(t: string): number {
+  const [h, m] = t.split(':').map(Number);
+  return h * 60 + m;
 }
 
 const today = (): string => new Date().toISOString().split('T')[0];
@@ -34,11 +40,19 @@ export const useBookingsStore = create<BookingsStore>()(
       },
 
       cancelBooking: (id) => {
-        set({ bookings: get().bookings.map((b) => b.id === id ? { ...b, status: 'cancelled' } : b) });
+        set({
+          bookings: get().bookings.map((b) =>
+            b.id === id ? { ...b, status: 'cancelled' as BookingStatus } : b
+          ),
+        });
       },
 
       updateStatus: (id, status) => {
-        set({ bookings: get().bookings.map((b) => b.id === id ? { ...b, status } : b) });
+        set({
+          bookings: get().bookings.map((b) =>
+            b.id === id ? { ...b, status } : b
+          ),
+        });
       },
 
       getBookingById: (id) => get().bookings.find((b) => b.id === id),
@@ -46,14 +60,37 @@ export const useBookingsStore = create<BookingsStore>()(
       getMasterBookings: (masterId) => get().bookings.filter((b) => b.masterId === masterId),
 
       getUpcomingBookings: (userId) =>
-        get().bookings
-          .filter((b) => b.clientId === userId && b.date >= today() && b.status !== 'cancelled')
-          .sort((a, b) => a.date.localeCompare(b.date)),
+        get()
+          .bookings.filter(
+            (b) => b.clientId === userId && b.date >= today() && b.status !== 'cancelled'
+          )
+          .sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time)),
 
       getPastBookings: (userId) =>
-        get().bookings
-          .filter((b) => b.clientId === userId && (b.date < today() || b.status === 'completed' || b.status === 'cancelled'))
+        get()
+          .bookings.filter(
+            (b) =>
+              b.clientId === userId &&
+              (b.date < today() || b.status === 'completed' || b.status === 'cancelled')
+          )
           .sort((a, b) => b.date.localeCompare(a.date)),
+
+      hasTimeConflict: (masterId, date, time, duration, excludeBookingId) => {
+        const newStart = timeToMinutes(time);
+        const newEnd = newStart + duration;
+
+        return get().bookings.some((b) => {
+          if (b.masterId !== masterId) return false;
+          if (b.date !== date) return false;
+          if (b.status === 'cancelled') return false;
+          if (excludeBookingId && b.id === excludeBookingId) return false;
+
+          const existingStart = timeToMinutes(b.time);
+          const existingEnd = existingStart + b.duration;
+
+          return newStart < existingEnd && newEnd > existingStart;
+        });
+      },
     }),
     {
       name: 'lumibeauty-bookings',

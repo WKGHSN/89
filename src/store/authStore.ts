@@ -1,10 +1,20 @@
 'use client';
 import { create } from 'zustand';
-import type { AuthUser } from '@/types';
+import type { AuthUser, UserRole } from '@/types';
 import { mockUsers } from '@/data/mock';
 
-const STORAGE_KEY = 'lumibeauty-auth';
+const AUTH_KEY = 'lumibeauty-auth';
+const USERS_KEY = 'lumibeauty-users';
 
+interface StoredUser {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  password: string;
+  role: UserRole;
+  masterId?: string;
+}
 
 interface AuthStore {
   user: AuthUser | null;
@@ -17,12 +27,37 @@ interface AuthStore {
   clearError: () => void;
   setHydrated: () => void;
 }
-// Єдине місце для роботи з localStorage — використовується скрізь
-const storage = {
+
+function getAllUsers(): StoredUser[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(USERS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  const initial: StoredUser[] = mockUsers.map((u) => ({
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    password: u.password,
+    role: u.role,
+    masterId: 'masterId' in u ? (u as StoredUser).masterId : undefined,
+  }));
+  localStorage.setItem(USERS_KEY, JSON.stringify(initial));
+  return initial;
+}
+
+function saveUsers(users: StoredUser[]): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  } catch {}
+}
+
+const authStorage = {
   get: (): AuthUser | null => {
     if (typeof window === 'undefined') return null;
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const raw = localStorage.getItem(AUTH_KEY);
       if (!raw) return null;
       const parsed = JSON.parse(raw);
       return parsed?.user ?? null;
@@ -30,88 +65,92 @@ const storage = {
       return null;
     }
   },
-
   set: (user: AuthUser): void => {
     if (typeof window === 'undefined') return;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ user }));
+      localStorage.setItem(AUTH_KEY, JSON.stringify({ user }));
     } catch {}
   },
-
   remove: (): void => {
     if (typeof window === 'undefined') return;
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(AUTH_KEY);
     } catch {}
   },
 };
 
-// ============ STORE ============
 export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
   isLoading: false,
   error: null,
   hydrated: false,
 
-  // Викликається в AuthHydration.tsx один раз при старті — відновлює сесію
   setHydrated: () => {
-    const user = storage.get();
+    const user = authStorage.get();
     set({ user, hydrated: true });
   },
 
   login: async (email, password) => {
     set({ isLoading: true, error: null });
+    await new Promise((r) => setTimeout(r, 400));
 
-    // TODO: замінити на реальний API-запит
-    await new Promise((r) => setTimeout(r, 600));
-
-    const found = mockUsers.find(
-      (u) => u.email === email && u.password === password
-    );
+    const users = getAllUsers();
+    const found = users.find((u) => u.email === email && u.password === password);
 
     if (!found) {
       set({ error: 'Невірний email або пароль', isLoading: false });
       return false;
     }
 
-    // Видаляємо пароль перед збереженням у стані та localStorage
-    const { password: _password, ...userWithoutPassword } = found;
-    const user = userWithoutPassword as AuthUser;
+    const user: AuthUser = {
+      id: found.id,
+      name: found.name,
+      email: found.email,
+      role: found.role,
+    };
 
-    storage.set(user);
+    authStorage.set(user);
     set({ user, isLoading: false });
     return true;
   },
 
   register: async (name, email, phone, password) => {
     set({ isLoading: true, error: null });
+    await new Promise((r) => setTimeout(r, 400));
 
-    // TODO: замінити на реальний API-запит
-    await new Promise((r) => setTimeout(r, 600));
-
-    const exists = mockUsers.find((u) => u.email === email);
+    const users = getAllUsers();
+    const exists = users.find((u) => u.email === email);
     if (exists) {
       set({ error: 'Користувач з таким email вже існує', isLoading: false });
       return false;
     }
 
-    const user: AuthUser = {
+    const newUser: StoredUser = {
       id: `client-${crypto.randomUUID()}`,
       name,
       email,
-      // phone зберігається в AuthUser — додай поле в types/index.ts якщо нема
+      phone,
+      password,
       role: 'client',
     };
 
-    // TODO: у реальному застосунку — зберігати користувача на бекенді
-    // mockUsers не оновлюємо бо це readonly дані розробки
-    storage.set(user);
-    set({ user, isLoading: false });
+    users.push(newUser);
+    saveUsers(users);
+
+    const authUser: AuthUser = {
+      id: newUser.id,
+      name: newUser.name,
+      email: newUser.email,
+      role: newUser.role,
+    };
+
+    authStorage.set(authUser);
+    set({ user: authUser, isLoading: false });
     return true;
   },
 
   logout: () => {
-    storage.remove();
+    authStorage.remove();
     set({ user: null });
   },
 

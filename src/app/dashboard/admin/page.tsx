@@ -7,12 +7,27 @@ import { Calendar, Users, BarChart3, Settings, LogOut, Plus, Search, ChevronRigh
 import { useAuthStore } from '@/store/authStore';
 import { useBookingsStore } from '@/store/bookingsStore';
 import { useDataStore } from '@/store/dataStore';
-import { serviceCategories } from '@/data/mock';
 import { formatDate, formatPrice, getStatusLabel, getStatusBadgeClass, cn } from '@/lib/utils';
 import toast from 'react-hot-toast';
 import type { Booking } from '@/types';
 
 type AdminTab = 'dashboard' | 'bookings' | 'services' | 'masters' | 'gallery' | 'clients';
+
+interface DashboardTabProps {
+  allBookings: Booking[];
+  todayBookings: Booking[];
+  pendingCount: number;
+  totalRevenue: number;
+  updateStatus: (id: string, status: 'confirmed' | 'completed' | 'cancelled' | 'pending') => void;
+}
+
+interface BookingsTabProps {
+  bookings: Booking[];
+  searchQuery: string;
+  setSearchQuery: (q: string) => void;
+  updateStatus: (id: string, status: 'confirmed' | 'completed' | 'cancelled' | 'pending') => void;
+  cancelBooking: (id: string) => void;
+}
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -92,17 +107,11 @@ export default function AdminDashboard() {
             <div className="bg-white rounded-3xl shadow-soft p-4">
               <nav className="flex flex-col gap-1">
                 {navItems.map(item => (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={cn('sidebar-nav-item text-left w-full', activeTab === item.id && 'active')}
-                  >
+                  <button key={item.id} onClick={() => setActiveTab(item.id)} className={cn('sidebar-nav-item text-left w-full', activeTab === item.id && 'active')}>
                     <item.icon className="w-4 h-4" />
                     {item.label}
                     {item.badge && item.badge > 0 && (
-                      <span className="ml-auto text-xs bg-lumi-rose text-white rounded-full w-5 h-5 flex items-center justify-center">
-                        {item.badge}
-                      </span>
+                      <span className="ml-auto text-xs bg-lumi-rose text-white rounded-full w-5 h-5 flex items-center justify-center">{item.badge}</span>
                     )}
                   </button>
                 ))}
@@ -124,7 +133,8 @@ export default function AdminDashboard() {
   );
 }
 
-function DashboardTab({ allBookings, todayBookings, pendingCount, totalRevenue, updateStatus }: any) {
+function DashboardTab({ allBookings, todayBookings, pendingCount, totalRevenue, updateStatus }: DashboardTabProps) {
+  const categories = useDataStore(s => s.serviceCategories);
   const statsCards = [
     { label: 'Записів сьогодні', value: todayBookings.length, icon: Calendar, color: 'bg-blue-50 text-blue-600' },
     { label: 'Очікують підтвердження', value: pendingCount, icon: Clock, color: 'bg-amber-50 text-amber-600' },
@@ -167,9 +177,7 @@ function DashboardTab({ allBookings, todayBookings, pendingCount, totalRevenue, 
                     <td><span className={getStatusBadgeClass(b.status)}>{getStatusLabel(b.status)}</span></td>
                     <td>
                       {b.status === 'pending' && (
-                        <button onClick={() => { updateStatus(b.id, 'confirmed'); toast.success('Підтверджено'); }} className="text-xs text-emerald-600 hover:text-emerald-800 font-medium">
-                          Підтвердити
-                        </button>
+                        <button onClick={() => { updateStatus(b.id, 'confirmed'); toast.success('Підтверджено'); }} className="text-xs text-emerald-600 hover:text-emerald-800 font-medium">Підтвердити</button>
                       )}
                     </td>
                   </tr>
@@ -183,7 +191,7 @@ function DashboardTab({ allBookings, todayBookings, pendingCount, totalRevenue, 
       <div className="bg-white rounded-2xl shadow-soft p-5">
         <h3 className="font-medium text-lumi-text mb-4">Записи по категоріях</h3>
         <div className="space-y-3">
-          {serviceCategories.map(cat => {
+          {categories.map(cat => {
             const count = allBookings.filter((b: Booking) => b.categoryName === cat.name).length;
             const pct = allBookings.length > 0 ? Math.round((count / allBookings.length) * 100) : 0;
             return (
@@ -203,14 +211,12 @@ function DashboardTab({ allBookings, todayBookings, pendingCount, totalRevenue, 
   );
 }
 
-function BookingsTab({ bookings, searchQuery, setSearchQuery, updateStatus, cancelBooking }: any) {
+function BookingsTab({ bookings, searchQuery, setSearchQuery, updateStatus, cancelBooking }: BookingsTabProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="font-serif font-medium text-lumi-text text-2xl">Всі записи</h2>
-        <Link href="/booking" className="btn-primary text-sm">
-          <Plus className="w-4 h-4" /> Новий запис
-        </Link>
+        <Link href="/booking" className="btn-primary text-sm"><Plus className="w-4 h-4" /> Новий запис</Link>
       </div>
       <div className="relative">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-lumi-muted" />
@@ -263,10 +269,11 @@ function BookingsTab({ bookings, searchQuery, setSearchQuery, updateStatus, canc
 
 function ServicesTab() {
   const { services: storeServices, addService, updateService, toggleServiceActive } = useDataStore();
+  const categories = useDataStore(s => s.serviceCategories);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editData, setEditData] = useState<{ name: string; price: number; duration: number }>({ name: '', price: 0, duration: 0 });
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newService, setNewService] = useState({ name: '', price: '', duration: '', categoryId: serviceCategories[0].id, description: '' });
+  const [newService, setNewService] = useState({ name: '', price: '', duration: '', categoryId: categories[0]?.id || '', description: '' });
 
   const startEdit = (s: typeof storeServices[0]) => {
     setEditingId(s.id);
@@ -289,7 +296,7 @@ function ServicesTab() {
       price: parseInt(newService.price) || 0,
       isActive: true,
     });
-    setNewService({ name: '', price: '', duration: '', categoryId: serviceCategories[0].id, description: '' });
+    setNewService({ name: '', price: '', duration: '', categoryId: categories[0]?.id || '', description: '' });
     setShowAddForm(false);
     toast.success('Послугу додано');
   };
@@ -298,9 +305,7 @@ function ServicesTab() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="font-serif font-medium text-lumi-text text-2xl">Послуги</h2>
-        <button className="btn-primary text-sm" onClick={() => setShowAddForm(true)}>
-          <Plus className="w-4 h-4" /> Додати послугу
-        </button>
+        <button className="btn-primary text-sm" onClick={() => setShowAddForm(true)}><Plus className="w-4 h-4" /> Додати послугу</button>
       </div>
 
       {showAddForm && (
@@ -314,7 +319,7 @@ function ServicesTab() {
             <div>
               <label className="text-xs text-lumi-muted block mb-1">Категорія</label>
               <select className="input-field" value={newService.categoryId} onChange={e => setNewService(p => ({ ...p, categoryId: e.target.value }))}>
-                {serviceCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
             <div>
@@ -337,7 +342,7 @@ function ServicesTab() {
         </div>
       )}
 
-      {serviceCategories.map(cat => {
+      {categories.map(cat => {
         const catServices = storeServices.filter(s => s.categoryId === cat.id);
         return (
           <div key={cat.id} className="bg-white rounded-2xl shadow-soft overflow-hidden">
@@ -366,9 +371,7 @@ function ServicesTab() {
                         : <span className="font-semibold">{formatPrice(s.price)}</span>}
                     </td>
                     <td>
-                      <span className={cn('badge', s.isActive ? 'badge-confirmed' : 'badge-cancelled')}>
-                        {s.isActive ? 'Активна' : 'Неактивна'}
-                      </span>
+                      <span className={cn('badge', s.isActive ? 'badge-confirmed' : 'badge-cancelled')}>{s.isActive ? 'Активна' : 'Неактивна'}</span>
                     </td>
                     <td>
                       <div className="flex gap-2">
@@ -380,9 +383,7 @@ function ServicesTab() {
                         ) : (
                           <>
                             <button onClick={() => startEdit(s)} className="text-xs text-lumi-rose font-medium">Редагувати</button>
-                            <button onClick={() => { toggleServiceActive(s.id); toast.success('Статус змінено'); }} className="text-xs text-lumi-muted font-medium">
-                              {s.isActive ? 'Вимкнути' : 'Увімкнути'}
-                            </button>
+                            <button onClick={() => { toggleServiceActive(s.id); toast.success('Статус змінено'); }} className="text-xs text-lumi-muted font-medium">{s.isActive ? 'Вимкнути' : 'Увімкнути'}</button>
                           </>
                         )}
                       </div>
@@ -441,8 +442,7 @@ function MastersTab() {
         if (width > height) { if (width > MAX) { height = Math.round(height * MAX / width); width = MAX; } }
         else { if (height > MAX) { width = Math.round(width * MAX / height); height = MAX; } }
         canvas.width = width; canvas.height = height;
-        const ctx = canvas.getContext('2d')!;
-        ctx.drawImage(img, 0, 0, width, height);
+        canvas.getContext('2d')!.drawImage(img, 0, 0, width, height);
         updateMasterAvatar(masterId, canvas.toDataURL('image/webp', 0.85));
         toast.success('Аватар оновлено');
       };
@@ -455,26 +455,19 @@ function MastersTab() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="font-serif font-medium text-lumi-text text-2xl">Майстри</h2>
-        <button className="btn-outline text-sm" onClick={() => toast('Для додавання майстра зверніться до розробника')}>
-          <Plus className="w-4 h-4" /> Додати майстра
-        </button>
+        <button className="btn-outline text-sm" onClick={() => toast('Для додавання майстра зверніться до розробника')}><Plus className="w-4 h-4" /> Додати майстра</button>
       </div>
-
       <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={e => {
         if (uploadingFor && e.target.files?.[0]) handleAvatarUpload(uploadingFor, e.target.files[0]);
         e.target.value = '';
       }} />
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {storeMasters.map(master => (
           <div key={master.id} className={cn('bg-white rounded-2xl shadow-soft p-5', !master.isActive && 'opacity-60')}>
             <div className="flex gap-4 mb-3">
               <div className="relative group flex-shrink-0">
                 <Image src={master.avatar} alt={master.name} width={64} height={64} className="rounded-2xl object-cover" />
-                <button
-                  onClick={() => { setUploadingFor(master.id); avatarInputRef.current?.click(); }}
-                  className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                >
+                <button onClick={() => { setUploadingFor(master.id); avatarInputRef.current?.click(); }} className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <Upload className="w-5 h-5 text-white" />
                 </button>
               </div>
@@ -493,13 +486,10 @@ function MastersTab() {
                       <p className="text-xs text-lumi-muted mt-0.5">{master.experience} р. досвіду · {master.reviewsCount} відгуків</p>
                     )}
                   </div>
-                  <span className={cn('badge flex-shrink-0', master.isActive !== false ? 'badge-confirmed' : 'badge-cancelled')}>
-                    {master.isActive !== false ? 'Активний' : 'Неактивний'}
-                  </span>
+                  <span className={cn('badge flex-shrink-0', master.isActive ? 'badge-confirmed' : 'badge-cancelled')}>{master.isActive ? 'Активний' : 'Неактивний'}</span>
                 </div>
               </div>
             </div>
-
             {editingId === master.id ? (
               <div className="space-y-3">
                 <div>
@@ -524,15 +514,9 @@ function MastersTab() {
                   ))}
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  <button onClick={() => startEdit(master)} className="text-xs text-lumi-rose font-medium">
-                    <Pencil className="w-3 h-3 inline mr-1" />Редагувати
-                  </button>
-                  <button onClick={() => { setUploadingFor(master.id); avatarInputRef.current?.click(); }} className="text-xs text-blue-500 font-medium">
-                    <Upload className="w-3 h-3 inline mr-1" />Фото
-                  </button>
-                  <button onClick={() => { toggleMasterActive(master.id); toast.success('Статус змінено'); }} className="text-xs text-lumi-muted font-medium">
-                    {master.isActive !== false ? 'Деактивувати' : 'Активувати'}
-                  </button>
+                  <button onClick={() => startEdit(master)} className="text-xs text-lumi-rose font-medium"><Pencil className="w-3 h-3 inline mr-1" />Редагувати</button>
+                  <button onClick={() => { setUploadingFor(master.id); avatarInputRef.current?.click(); }} className="text-xs text-blue-500 font-medium"><Upload className="w-3 h-3 inline mr-1" />Фото</button>
+                  <button onClick={() => { toggleMasterActive(master.id); toast.success('Статус змінено'); }} className="text-xs text-lumi-muted font-medium">{master.isActive ? 'Деактивувати' : 'Активувати'}</button>
                 </div>
               </div>
             )}
@@ -545,6 +529,7 @@ function MastersTab() {
 
 function GalleryTab() {
   const { gallery, addGalleryItem, removeGalleryItem, updateGalleryItem, reorderGallery, masters: storeMasters } = useDataStore();
+  const categories = useDataStore(s => s.serviceCategories);
   const [showUpload, setShowUpload] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDesc, setEditDesc] = useState('');
@@ -555,10 +540,10 @@ function GalleryTab() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [newPhoto, setNewPhoto] = useState({
-    imageDataUrl: '',
+    imageUrl: '',
     description: '',
     masterName: '',
-    categoryId: serviceCategories[0].id,
+    categoryId: categories[0]?.id || '',
   });
 
   const processImageFile = (file: File): Promise<string> => {
@@ -578,8 +563,7 @@ function GalleryTab() {
             else { width = Math.round(width * MAX / height); height = MAX; }
           }
           canvas.width = width; canvas.height = height;
-          const ctx = canvas.getContext('2d')!;
-          ctx.drawImage(img, 0, 0, width, height);
+          canvas.getContext('2d')!.drawImage(img, 0, 0, width, height);
           resolve(canvas.toDataURL('image/webp', 0.85));
         };
         img.src = dataUrl;
@@ -592,23 +576,23 @@ function GalleryTab() {
     if (!files || files.length === 0) return;
     try {
       const dataUrl = await processImageFile(files[0]);
-      setNewPhoto(p => ({ ...p, imageDataUrl: dataUrl }));
+      setNewPhoto(p => ({ ...p, imageUrl: dataUrl }));
     } catch (err) {
       toast.error(typeof err === 'string' ? err : 'Помилка обробки файлу');
     }
   };
 
   const handleAddPhoto = () => {
-    if (!newPhoto.imageDataUrl) { toast.error('Оберіть фото'); return; }
-    const cat = serviceCategories.find(c => c.id === newPhoto.categoryId)!;
+    if (!newPhoto.imageUrl) { toast.error('Оберіть фото'); return; }
+    const cat = categories.find(c => c.id === newPhoto.categoryId)!;
     addGalleryItem({
-      imageUrl: newPhoto.imageDataUrl,
+      imageUrl: newPhoto.imageUrl,
       categoryId: newPhoto.categoryId,
       categoryName: cat.name,
       masterName: newPhoto.masterName || undefined,
       description: newPhoto.description,
     });
-    setNewPhoto({ imageDataUrl: '', description: '', masterName: '', categoryId: serviceCategories[0].id });
+    setNewPhoto({ imageUrl: '', description: '', masterName: '', categoryId: categories[0]?.id || '' });
     setShowUpload(false);
     toast.success('Фото додано до галереї');
   };
@@ -631,15 +615,13 @@ function GalleryTab() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="font-serif font-medium text-lumi-text text-2xl">Галерея ({gallery.length} фото)</h2>
-        <button className="btn-primary text-sm" onClick={() => setShowUpload(!showUpload)}>
-          <Upload className="w-4 h-4" /> Завантажити фото
-        </button>
+        <button className="btn-primary text-sm" onClick={() => setShowUpload(!showUpload)}><Upload className="w-4 h-4" /> Завантажити фото</button>
       </div>
 
       {showUpload && (
         <div className="bg-white rounded-2xl shadow-soft p-5 border-2 border-lumi-blush">
           <h3 className="font-medium text-lumi-text mb-4">Нове фото</h3>
-          {!newPhoto.imageDataUrl ? (
+          {!newPhoto.imageUrl ? (
             <div
               className={cn('border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-colors mb-4',
                 dragOver ? 'border-lumi-rose bg-lumi-blush/20' : 'border-lumi-border hover:border-lumi-rose hover:bg-lumi-milk'
@@ -654,27 +636,25 @@ function GalleryTab() {
             </div>
           ) : (
             <div className="relative mb-4 inline-block">
-              <Image src={newPhoto.imageDataUrl} alt="preview" width={160} height={160} className="object-cover rounded-2xl" />
-              <button onClick={() => setNewPhoto(p => ({ ...p, imageDataUrl: '' }))} className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center">
+              <Image src={newPhoto.imageUrl} alt="preview" width={160} height={160} className="object-cover rounded-2xl" />
+              <button onClick={() => setNewPhoto(p => ({ ...p, imageUrl: '' }))} className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center">
                 <X className="w-3 h-3" />
               </button>
             </div>
           )}
-
           <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={e => handleFileSelect(e.target.files)} />
-
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
             <div>
               <label className="text-xs text-lumi-muted block mb-1">Категорія</label>
               <select className="input-field" value={newPhoto.categoryId} onChange={e => setNewPhoto(p => ({ ...p, categoryId: e.target.value }))}>
-                {serviceCategories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
+                {categories.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}
               </select>
             </div>
             <div>
               <label className="text-xs text-lumi-muted block mb-1">Майстер</label>
               <select className="input-field" value={newPhoto.masterName} onChange={e => setNewPhoto(p => ({ ...p, masterName: e.target.value }))}>
                 <option value="">— Оберіть майстра —</option>
-                {storeMasters.filter(m => m.isActive !== false).map(m => <option key={m.id} value={m.name}>{m.name}</option>)}
+                {storeMasters.filter(m => m.isActive).map(m => <option key={m.id} value={m.name}>{m.name}</option>)}
               </select>
             </div>
             <div className="sm:col-span-2">
@@ -684,13 +664,12 @@ function GalleryTab() {
           </div>
           <div className="flex gap-2">
             <button onClick={handleAddPhoto} className="btn-primary text-sm">Опублікувати</button>
-            <button onClick={() => { setShowUpload(false); setNewPhoto({ imageDataUrl: '', description: '', masterName: '', categoryId: serviceCategories[0].id }); }} className="btn-outline text-sm">Скасувати</button>
+            <button onClick={() => { setShowUpload(false); setNewPhoto({ imageUrl: '', description: '', masterName: '', categoryId: categories[0]?.id || '' }); }} className="btn-outline text-sm">Скасувати</button>
           </div>
         </div>
       )}
 
       <p className="text-xs text-lumi-muted">Перетягніть картки для зміни порядку в галереї</p>
-
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {gallery.map(photo => (
           <div
@@ -707,7 +686,7 @@ function GalleryTab() {
               <GripVertical className="w-3 h-3 text-lumi-muted" />
             </div>
             <div className="aspect-square overflow-hidden">
-              <Image src={photo.imageUrl} alt={photo.description || ''} width={300} height={300} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+              <img src={photo.imageUrl} alt={photo.description || ''} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
             </div>
             <div className="p-3">
               {editingId === photo.id ? (
@@ -715,7 +694,7 @@ function GalleryTab() {
                   <input className="input-field text-xs py-1 px-2" value={editDesc} onChange={e => setEditDesc(e.target.value)} placeholder="Опис..." autoFocus />
                   <select className="input-field text-xs py-1 px-2" value={editMaster} onChange={e => setEditMaster(e.target.value)}>
                     <option value="">— Майстер —</option>
-                    {storeMasters.filter(m => m.isActive !== false).map(m => <option key={m.id} value={m.name}>{m.name}</option>)}
+                    {storeMasters.filter(m => m.isActive).map(m => <option key={m.id} value={m.name}>{m.name}</option>)}
                   </select>
                   <div className="flex gap-1">
                     <button onClick={() => { updateGalleryItem(photo.id, { description: editDesc, masterName: editMaster || undefined }); setEditingId(null); toast.success('Опис оновлено'); }} className="text-xs text-emerald-600 font-medium">Зберегти</button>
@@ -743,11 +722,8 @@ function GalleryTab() {
           </div>
         ))}
       </div>
-
       {gallery.length === 0 && (
-        <div className="text-center py-16 text-lumi-muted">
-          <p>Галерея порожня. Завантажте перше фото!</p>
-        </div>
+        <div className="text-center py-16 text-lumi-muted"><p>Галерея порожня. Завантажте перше фото!</p></div>
       )}
     </div>
   );
@@ -757,15 +733,12 @@ function ClientsTab({ bookings }: { bookings: Booking[] }) {
   const uniqueClients = Array.from(
     new Map(bookings.map(b => [b.clientId, { id: b.clientId, name: b.clientName, phone: b.clientPhone }])).values()
   );
-
   return (
     <div className="space-y-4">
       <h2 className="font-serif font-medium text-lumi-text text-2xl">Клієнти ({uniqueClients.length})</h2>
       <div className="bg-white rounded-2xl shadow-soft overflow-hidden">
         <table className="admin-table">
-          <thead>
-            <tr><th>Клієнт</th><th>Телефон</th><th>Записів</th><th>Витрачено</th></tr>
-          </thead>
+          <thead><tr><th>Клієнт</th><th>Телефон</th><th>Записів</th><th>Витрачено</th></tr></thead>
           <tbody>
             {uniqueClients.map(client => {
               const clientBookings = bookings.filter(b => b.clientId === client.id);

@@ -2,13 +2,12 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { ChevronRight, X, ChevronLeft, ChevronRight as ChevronRightIcon } from 'lucide-react';
-import { serviceCategories } from '@/data/mock';
-import { useDataStore, type DataGalleryItem } from '@/store/dataStore';
+import { useDataStore } from '@/store/dataStore';
 import { cn } from '@/lib/utils';
+import type { GalleryItem } from '@/types';
 
-// ============ LIGHTBOX ============
 function Lightbox({ items, index, onClose, onPrev, onNext }: {
-  items: DataGalleryItem[];
+  items: GalleryItem[];
   index: number;
   onClose: () => void;
   onPrev: () => void;
@@ -25,7 +24,6 @@ function Lightbox({ items, index, onClose, onPrev, onNext }: {
         className="relative max-w-3xl w-full max-h-[90vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
-        {/* Close */}
         <button
           onClick={onClose}
           className="absolute -top-12 right-0 text-white/70 hover:text-white transition-colors"
@@ -33,7 +31,6 @@ function Lightbox({ items, index, onClose, onPrev, onNext }: {
           <X className="w-6 h-6" />
         </button>
 
-        {/* Image */}
         <div className="relative rounded-2xl overflow-hidden bg-black">
           <img
             src={item.imageUrl}
@@ -42,7 +39,6 @@ function Lightbox({ items, index, onClose, onPrev, onNext }: {
           />
         </div>
 
-        {/* Caption */}
         <div className="mt-4 px-2 text-white">
           <div className="flex items-center gap-2 mb-1">
             <span className="inline-block bg-lumi-rose/80 text-white text-xs px-3 py-1 rounded-full">
@@ -57,7 +53,6 @@ function Lightbox({ items, index, onClose, onPrev, onNext }: {
           )}
         </div>
 
-        {/* Navigation */}
         <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between pointer-events-none px-2">
           <button
             onClick={onPrev}
@@ -73,7 +68,6 @@ function Lightbox({ items, index, onClose, onPrev, onNext }: {
           </button>
         </div>
 
-        {/* Counter */}
         <div className="text-center mt-3 text-white/50 text-sm">
           {index + 1} / {items.length}
         </div>
@@ -82,19 +76,18 @@ function Lightbox({ items, index, onClose, onPrev, onNext }: {
   );
 }
 
-// ============ GALLERY PAGE ============
 export default function GalleryPage() {
   const galleryItems = useDataStore(s => s.gallery);
+  const categories = useDataStore(s => s.serviceCategories);
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [activeMasterFilter, setActiveMasterFilter] = useState<string>('all');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const filters = [
     { id: 'all', label: 'Всі роботи' },
-    ...serviceCategories.map(c => ({ id: c.id, label: c.name })),
+    ...categories.map(c => ({ id: c.id, label: c.name })),
   ];
 
-  // Collect unique masters from gallery items
   const galMasters = Array.from(
     new Set(galleryItems.map(g => g.masterName).filter(Boolean))
   );
@@ -123,7 +116,6 @@ export default function GalleryPage() {
       </div>
 
       <div className="page-container py-8">
-        {/* Category Filters */}
         <div className="flex flex-wrap gap-2 mb-3">
           {filters.map((f) => (
             <button
@@ -141,7 +133,6 @@ export default function GalleryPage() {
           ))}
         </div>
 
-        {/* Master Filters */}
         {galMasters.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-8">
             <button
@@ -172,7 +163,6 @@ export default function GalleryPage() {
           </div>
         )}
 
-        {/* Gallery Grid with captions always visible below */}
         <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
           {filtered.map((item, idx) => (
             <div
@@ -186,7 +176,6 @@ export default function GalleryPage() {
                   alt={item.description}
                   className="w-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                {/* Hover overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                   <span className="inline-block bg-lumi-rose/90 text-white text-xs px-2.5 py-1 rounded-full mb-1">
@@ -197,7 +186,6 @@ export default function GalleryPage() {
                   )}
                 </div>
               </div>
-              {/* Caption always visible below image */}
               {item.description && (
                 <div className="px-1 pt-2 pb-3">
                   <p className="text-lumi-text text-sm font-medium leading-snug">{item.description}</p>
@@ -218,7 +206,6 @@ export default function GalleryPage() {
         )}
       </div>
 
-      {/* Lightbox */}
       {lightboxIndex !== null && (
         <Lightbox
           items={filtered}

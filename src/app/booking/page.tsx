@@ -10,7 +10,7 @@ import { useBookingsStore } from '@/store/bookingsStore';
 import { useAuthStore } from '@/store/authStore';
 import { useNotificationsStore } from '@/store/notificationsStore';
 import { useDataStore } from '@/store/dataStore';
-import { serviceCategories, generateTimeSlots } from '@/data/mock';
+import { generateTimeSlots } from '@/data/mock';
 import { formatPrice, formatDuration, formatDate, cn, generateCalendarDays, MONTHS_UK, WEEKDAYS_UK } from '@/lib/utils';
 import type { Service, Master } from '@/types';
 
@@ -112,7 +112,8 @@ function BookingSummary() {
 
 // ============ STEP 1: SELECT SERVICE ============
 function Step1({ onNext }: { onNext: () => void }) {
-  const [activeCategory, setActiveCategory] = useState<string>(serviceCategories[0].id);
+  const serviceCategories = useDataStore(s => s.serviceCategories);
+  const [activeCategory, setActiveCategory] = useState<string>(serviceCategories[0]?.id || '');
   const { setService } = useBookingWizardStore();
   const allServices = useDataStore(s => s.services);
 
@@ -314,7 +315,9 @@ function Step4({ onNext }: { onNext: () => void }) {
 
   if (!selectedDate || !selectedMaster) return null;
 
-  const slots = generateTimeSlots(selectedDate, selectedMaster.id, allBookings);
+  const { selectedService } = useBookingWizardStore();
+  const serviceDuration = selectedService?.duration || 60;
+  const slots = generateTimeSlots(selectedDate, selectedMaster.id, allBookings, serviceDuration);
 
   const handleSelect = (time: string) => {
     setTime(time);
@@ -501,7 +504,7 @@ function SuccessPopup({ onClose, onGoBookings }: { onClose: () => void; onGoBook
         <div className="w-20 h-20 rounded-full bg-lumi-blush/30 flex items-center justify-center mx-auto mb-6">
           <Check className="w-10 h-10 text-lumi-rose" />
         </div>
-        <h2 className="text-2xl font-serif font-medium text-lumi-text mb-3">Запис підтверджено!</h2>
+        <h2 className="text-2xl font-serif font-medium text-lumi-text mb-3">Запис створено!</h2>
         <div className="bg-lumi-milk rounded-2xl p-4 mb-5 text-left space-y-2">
           {selectedService && (
             <div className="flex justify-between text-sm">
@@ -528,7 +531,7 @@ function SuccessPopup({ onClose, onGoBookings }: { onClose: () => void; onGoBook
             </div>
           )}
         </div>
-        <p className="text-sm text-lumi-muted mb-6">🌸 Вітаємо! Очікуємо на вас у визначений час.</p>
+        <p className="text-sm text-lumi-muted mb-6">🌸 Ваш запис очікує підтвердження адміністратором.</p>
         <div className="flex flex-col gap-3">
           <button onClick={onGoBookings} className="btn-primary w-full justify-center">Мої записи</button>
           <button onClick={onClose} className="btn-outline w-full justify-center">На головну</button>
@@ -589,14 +592,13 @@ export default function BookingPage() {
       time: selectedTime,
       duration: selectedService.duration,
       price: selectedService.price,
-      status: 'confirmed',
+      status: 'pending',
       notes: store.notes,
     });
 
-    // Виправлено: використовуємо createBookingConfirmation замість createBookingReminders
     createBookingConfirmation(newBooking);
     setIsSuccess(true);
-    toast.success('Запис успішно створено!');
+    toast.success('Запис створено! Очікуйте підтвердження.');
   };
 
   if (mounted && user && (user.role === 'admin' || user.role === 'master')) {

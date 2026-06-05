@@ -2,11 +2,12 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, Star, Users, Award, Calendar, ChevronRight, Quote } from 'lucide-react';
-import { serviceCategories, masters, reviews } from '@/data/mock';
 import { useAuthStore } from '@/store/authStore';
-import { useBookingsStore } from '@/store/bookingsStore'; 
+import { useBookingsStore } from '@/store/bookingsStore';
+import { useDataStore } from '@/store/dataStore';
 import { formatDate } from '@/lib/utils';
 import { useState, useEffect } from 'react';
+import type { ServiceCategory } from '@/types';
 
 const STAR_PATH = 'M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z';
 
@@ -30,7 +31,7 @@ function StarRating({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'md
   );
 }
 
-function ServiceCard({ category }: { category: typeof serviceCategories[0] }) {
+function ServiceCard({ category }: { category: ServiceCategory }) {
   return (
     <Link href={`/services?category=${category.slug}`} className="group h-full">
       <div className="card-hover p-6 flex flex-col items-center text-center gap-4 h-full">
@@ -52,7 +53,6 @@ function ServiceCard({ category }: { category: typeof serviceCategories[0] }) {
 function NextBookingCard() {
   const [mounted, setMounted] = useState(false);
   const { user } = useAuthStore();
-  // ✅ використовуємо getUpcomingBookings з bookingsStore замість ручної фільтрації
   const getUpcomingBookings = useBookingsStore((s) => s.getUpcomingBookings);
 
   useEffect(() => { setMounted(true); }, []);
@@ -78,7 +78,7 @@ function NextBookingCard() {
 
   if (!next) return floatingCard('📅', 'Немає записів', 'Записатись зараз');
 
-  const today = new Date().toISOString().split('T')[0];
+  const todayStr = new Date().toISOString().split('T')[0];
 
   return (
     <div className="absolute -left-8 top-1/4 glass rounded-2xl p-4 shadow-card animate-float max-w-[200px]">
@@ -90,7 +90,7 @@ function NextBookingCard() {
           <p className="text-xs text-lumi-muted">Наступний запис</p>
           <p className="text-sm font-semibold text-lumi-text leading-tight truncate">{next.serviceName}</p>
           <p className="text-xs text-lumi-muted mt-0.5">
-            {next.date === today ? 'Сьогодні' : formatDate(next.date)} · {next.time}
+            {next.date === todayStr ? 'Сьогодні' : formatDate(next.date)} · {next.time}
           </p>
         </div>
       </div>
@@ -98,16 +98,17 @@ function NextBookingCard() {
   );
 }
 
-// ============ HOME PAGE ============
 export default function HomePage() {
+  const serviceCategories = useDataStore(s => s.serviceCategories);
+  const masters = useDataStore(s => s.masters);
+  const storeReviews = useDataStore(s => s.reviews);
+  const activeMasters = masters.filter(m => m.isActive);
+
   return (
     <>
-      {/* ===== HERO SECTION ===== */}
       <section className="relative overflow-hidden bg-lumi-milk">
         <div className="page-container py-12 md:py-20">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-[calc(100vh-5rem)]">
-
-            {/* Left: Text */}
             <div className="flex flex-col gap-6 animate-slide-up">
               <div className="inline-flex">
                 <span className="section-tag">✨ Преміум салон краси у Києві</span>
@@ -133,11 +134,9 @@ export default function HomePage() {
                   Переглянути послуги
                 </Link>
               </div>
-
-              {/* Trust indicators */}
               <div className="flex items-center gap-6 pt-2">
                 <div className="flex -space-x-2">
-                  {masters.slice(0, 3).map((master) => (
+                  {activeMasters.slice(0, 3).map((master) => (
                     <div key={master.id} className="w-9 h-9 rounded-full border-2 border-white overflow-hidden bg-lumi-nude">
                       <Image src={master.avatar} alt={master.name} width={36} height={36} className="w-full h-full object-cover" />
                     </div>
@@ -153,7 +152,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right: Image */}
             <div className="relative hidden lg:block">
               <div className="relative rounded-[3rem] overflow-hidden aspect-[4/5] shadow-hover">
                 <Image
@@ -181,7 +179,6 @@ export default function HomePage() {
         <div className="absolute top-0 right-0 w-1/2 h-full -z-10 bg-gradient-to-l from-lumi-cream/50 to-transparent pointer-events-none" />
       </section>
 
-      {/* ===== STATS SECTION ===== */}
       <section className="bg-white py-12 border-y border-lumi-border">
         <div className="page-container">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -200,7 +197,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ===== SERVICES SECTION ===== */}
       <section className="section bg-lumi-milk">
         <div className="page-container">
           <div className="text-center mb-12">
@@ -223,58 +219,57 @@ export default function HomePage() {
         </div>
       </section>
 
-    {/* ===== MASTERS SECTION ===== */}
-<section className="section bg-lumi-cream/50">
-  <div className="page-container">
-    <div className="text-center mb-12">
-      <span className="section-tag">Наша команда</span>
-      <h2 className="section-title">Майстри своєї справи</h2>
-      <p className="section-subtitle mx-auto">
-        Кожен наш майстер — це сертифікований фахівець із роками досвіду та любов&apos;ю до своєї роботи.
-      </p>
-    </div>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      {masters.map((master) => (
-        <div key={master.id} className="group card-hover overflow-hidden">
-          <div className="relative aspect-[3/4] overflow-hidden">
-            <Image
-              src={master.avatar}
-              alt={master.name}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-lumi-text/60 to-transparent" />
-            <div className="absolute bottom-4 left-4 right-4">
-              <p className="font-serif font-medium text-white text-lg leading-tight">{master.name}</p>
-              <p className="text-white/80 text-sm mt-1">{master.specializations.join(' · ')}</p>
-            </div>
-            <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-1">
-              <svg className="w-3 h-3 fill-amber-400" viewBox="0 0 20 20">
-                <path d={STAR_PATH} />
-              </svg>
-              <span className="text-xs font-semibold text-lumi-text">{master.rating}</span>
-            </div>
+      <section className="section bg-lumi-cream/50">
+        <div className="page-container">
+          <div className="text-center mb-12">
+            <span className="section-tag">Наша команда</span>
+            <h2 className="section-title">Майстри своєї справи</h2>
+            <p className="section-subtitle mx-auto">
+              Кожен наш майстер — це сертифікований фахівець із роками досвіду та любов&apos;ю до своєї роботи.
+            </p>
           </div>
-          <div className="p-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-lumi-muted">{master.experience} р. досвіду</span>
-              <span className="text-xs text-lumi-muted">{master.reviewsCount} відгуків</span>
-            </div>
-            <Link href="/booking" className="btn-primary w-full justify-center mt-3 py-2.5 text-sm">
-              Записатись
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {activeMasters.map((master) => (
+              <div key={master.id} className="group card-hover overflow-hidden">
+                <div className="relative aspect-[3/4] overflow-hidden">
+                  <Image
+                    src={master.avatar}
+                    alt={master.name}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-lumi-text/60 to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <p className="font-serif font-medium text-white text-lg leading-tight">{master.name}</p>
+                    <p className="text-white/80 text-sm mt-1">{master.specializations.join(' · ')}</p>
+                  </div>
+                  <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-1">
+                    <svg className="w-3 h-3 fill-amber-400" viewBox="0 0 20 20">
+                      <path d={STAR_PATH} />
+                    </svg>
+                    <span className="text-xs font-semibold text-lumi-text">{master.rating}</span>
+                  </div>
+                </div>
+                <div className="p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-lumi-muted">{master.experience} р. досвіду</span>
+                    <span className="text-xs text-lumi-muted">{master.reviewsCount} відгуків</span>
+                  </div>
+                  <Link href="/booking" className="btn-primary w-full justify-center mt-3 py-2 text-sm">
+                    Записатись
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-8">
+            <Link href="/masters" className="btn-outline">
+              Всі майстри <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
-      ))}
-    </div>
-    <div className="text-center mt-8">
-      <Link href="/masters" className="btn-outline">
-        Всі майстри <ArrowRight className="w-4 h-4" />
-      </Link>
-    </div>
-  </div>
-</section>
-      {/* ===== REVIEWS SECTION ===== */}
+      </section>
+
       <section className="section bg-white">
         <div className="page-container">
           <div className="text-center mb-12">
@@ -285,7 +280,7 @@ export default function HomePage() {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {reviews.slice(0, 3).map((review) => (
+            {storeReviews.slice(0, 3).map((review) => (
               <div key={review.id} className="card p-6 flex flex-col gap-4">
                 <div className="flex items-start justify-between">
                   <StarRating rating={review.rating} />
@@ -316,7 +311,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ===== CTA SECTION ===== */}
       <section className="section">
         <div className="page-container">
           <div className="relative bg-gradient-to-br from-lumi-text via-lumi-text to-lumi-rose/30 rounded-[3rem] overflow-hidden p-10 md:p-16 text-center">

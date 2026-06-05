@@ -25,13 +25,15 @@ export default function ClientDashboard() {
   useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
-    if (mounted && !user) {
-      router.push('/auth/login');
+    if (mounted && (!user || user.role !== 'client')) {
+      if (!user) router.push('/auth/login');
+      else if (user.role === 'admin') router.push('/dashboard/admin');
+      else if (user.role === 'master') router.push('/dashboard/master');
     }
   }, [mounted, user, router]);
 
   if (!mounted) return <div className="min-h-screen bg-lumi-milk" />;
-  if (!user) return <div className="min-h-screen bg-lumi-milk" />;
+  if (!user || user.role !== 'client') return <div className="min-h-screen bg-lumi-milk" />;
 
   const userBookings = allBookings.filter(b => b.clientId === user.id);
   const upcoming = getUpcomingBookings(user.id);

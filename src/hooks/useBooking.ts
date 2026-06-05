@@ -26,7 +26,7 @@ export const useBooking = () => {
       time: selectedTime,
       duration: selectedService.duration,
       price: selectedService.price,
-      status: 'confirmed',
+      status: 'pending',
       notes,
     });
 

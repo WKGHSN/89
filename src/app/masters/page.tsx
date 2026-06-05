@@ -1,13 +1,11 @@
 'use client';
 import Link from 'next/link';
 import { ChevronRight, Star, Award, Clock, X, Calendar, BookOpen, CheckCircle } from 'lucide-react';
-import { serviceCategories } from '@/data/mock';
 import { useDataStore } from '@/store/dataStore';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { Master } from '@/types';
 
-// ============ MASTER DETAIL MODAL ============
 const CERTIFICATES: Record<string, string[]> = {
   'master-1': [
     'Сертифікат майстра манікюру (NAILS PRO Academy, 2017)',
@@ -68,39 +66,22 @@ function MasterModal({ master, onClose }: { master: Master; onClose: () => void 
   const workDaysLabel = days.filter((_, i) => master.workingDays.includes(i)).join(', ');
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
-        className="relative bg-white rounded-3xl shadow-hover w-full max-w-3xl max-h-[90vh] overflow-y-auto"
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-lumi-cream hover:bg-lumi-beige transition-colors"
-        >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={onClose}>
+      <div className="relative bg-white rounded-3xl shadow-hover w-full max-w-3xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-4 right-4 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-lumi-cream hover:bg-lumi-beige transition-colors">
           <X className="w-4 h-4 text-lumi-muted" />
         </button>
-
-        {/* Layout: photo left + info right on md+ */}
         <div className="flex flex-col md:flex-row">
-          {/* Photo sidebar */}
           <div className="md:w-56 lg:w-64 flex-shrink-0">
             <div className="relative h-56 md:h-full md:min-h-[420px] overflow-hidden rounded-t-3xl md:rounded-l-3xl md:rounded-tr-none">
               <img src={master.avatar} alt={master.name} className="w-full h-full object-cover object-top" />
               <div className="absolute inset-0 bg-gradient-to-t from-lumi-text/60 to-transparent" />
-              {/* Name overlay on mobile */}
               <div className="md:hidden absolute bottom-4 left-4 right-12 text-white">
                 <h2 className="font-serif font-semibold text-xl leading-tight">{master.name}</h2>
               </div>
             </div>
           </div>
-
-          {/* Right content */}
           <div className="flex-1 min-w-0">
-            {/* Header */}
             <div className="hidden md:block px-6 pt-6 pb-4 border-b border-lumi-border">
               <h2 className="font-serif font-semibold text-2xl text-lumi-text leading-tight">{master.name}</h2>
               <div className="flex flex-wrap gap-1.5 mt-2">
@@ -109,8 +90,6 @@ function MasterModal({ master, onClose }: { master: Master; onClose: () => void 
                 ))}
               </div>
             </div>
-
-            {/* Stats row */}
             <div className="grid grid-cols-3 gap-4 px-6 py-4 border-b border-lumi-border bg-lumi-milk/50">
               <div className="text-center">
                 <div className="flex items-center justify-center gap-1 mb-0.5">
@@ -129,180 +108,131 @@ function MasterModal({ master, onClose }: { master: Master; onClose: () => void 
               <div className="text-center">
                 <div className="flex items-center justify-center gap-1 mb-0.5">
                   <Clock className="w-4 h-4 text-lumi-rose" />
-                  <span className="font-bold text-lumi-text text-sm">{master.workingHours.start}–{master.workingHours.end}</span>
+                  <span className="font-bold text-lumi-text text-xs">{master.workingHours.start}–{master.workingHours.end}</span>
                 </div>
                 <p className="text-xs text-lumi-muted">{workDaysLabel}</p>
               </div>
             </div>
-
-        <div className="p-6 space-y-6">
-          {/* Bio / Specialization */}
-          <div>
-            <h3 className="font-serif font-medium text-lumi-text text-lg mb-3 flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-lumi-rose" />
-              Про майстра
-            </h3>
-            <p className="text-lumi-muted leading-relaxed">{master.bio}</p>
-          </div>
-
-          {/* Specialization tags */}
-          <div>
-            <h3 className="font-serif font-medium text-lumi-text text-lg mb-3 flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-lumi-rose" />
-              Спеціалізація
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {master.specializations.map(s => (
-                <span key={s} className="px-4 py-2 bg-lumi-blush/20 text-lumi-rose rounded-full text-sm font-medium">
-                  {s}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Work Experience */}
-          {experience.length > 0 && (
-            <div>
-              <h3 className="font-serif font-medium text-lumi-text text-lg mb-3 flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-lumi-rose" />
-                Досвід роботи
-              </h3>
-              <div className="space-y-3">
-                {experience.map((exp, i) => (
-                  <div key={i} className="flex gap-4">
-                    <div className="flex flex-col items-center">
-                      <div className="w-2.5 h-2.5 rounded-full bg-lumi-rose mt-1.5 flex-shrink-0" />
-                      {i < experience.length - 1 && <div className="w-px flex-1 bg-lumi-border mt-1" />}
-                    </div>
-                    <div className="pb-3">
-                      <p className="text-xs text-lumi-muted">{exp.year}</p>
-                      <p className="font-medium text-lumi-text text-sm">{exp.title}</p>
-                      <p className="text-xs text-lumi-muted">{exp.place}</p>
-                    </div>
-                  </div>
-                ))}
+            <div className="p-6 space-y-6">
+              <div>
+                <h3 className="font-serif font-medium text-lumi-text text-lg mb-3 flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-lumi-rose" /> Про майстра
+                </h3>
+                <p className="text-lumi-muted leading-relaxed">{master.bio}</p>
               </div>
+              <div>
+                <h3 className="font-serif font-medium text-lumi-text text-lg mb-3 flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-lumi-rose" /> Спеціалізація
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {master.specializations.map(s => (
+                    <span key={s} className="px-3 py-1.5 bg-lumi-blush/20 text-lumi-rose rounded-full text-sm font-medium">{s}</span>
+                  ))}
+                </div>
+              </div>
+              {experience.length > 0 && (
+                <div>
+                  <h3 className="font-serif font-medium text-lumi-text text-lg mb-3 flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-lumi-rose" /> Досвід роботи
+                  </h3>
+                  <div className="space-y-3">
+                    {experience.map((exp, i) => (
+                      <div key={i} className="flex gap-4">
+                        <div className="flex flex-col items-center">
+                          <div className="w-2.5 h-2.5 rounded-full bg-lumi-rose mt-1.5 flex-shrink-0" />
+                          {i < experience.length - 1 && <div className="w-px flex-1 bg-lumi-border mt-1" />}
+                        </div>
+                        <div className="pb-3">
+                          <p className="text-xs text-lumi-muted">{exp.year}</p>
+                          <p className="font-medium text-lumi-text text-sm">{exp.title}</p>
+                          <p className="text-xs text-lumi-muted">{exp.place}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {certs.length > 0 && (
+                <div>
+                  <h3 className="font-serif font-medium text-lumi-text text-lg mb-3 flex items-center gap-2">
+                    <Award className="w-4 h-4 text-lumi-rose" /> Сертифікати та навчання
+                  </h3>
+                  <ul className="space-y-2">
+                    {certs.map((cert, i) => (
+                      <li key={i} className="flex items-start gap-2.5">
+                        <div className="w-5 h-5 rounded-full bg-lumi-blush/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <CheckCircle className="w-3 h-3 text-lumi-rose" />
+                        </div>
+                        <span className="text-sm text-lumi-muted leading-relaxed">{cert}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <Link
+                href={`/booking?master=${master.id}`}
+                className="btn-primary w-full justify-center py-3 text-sm"
+                onClick={onClose}
+              >
+                Записатись до {master.name.split(' ')[0]}
+              </Link>
             </div>
-          )}
-
-          {/* Certificates */}
-          {certs.length > 0 && (
-            <div>
-              <h3 className="font-serif font-medium text-lumi-text text-lg mb-3 flex items-center gap-2">
-                <Award className="w-4 h-4 text-lumi-rose" />
-                Сертифікати та навчання
-              </h3>
-              <ul className="space-y-2">
-                {certs.map((cert, i) => (
-                  <li key={i} className="flex items-start gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-lumi-blush/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <CheckCircle className="w-3 h-3 text-lumi-rose" />
-                    </div>
-                    <span className="text-sm text-lumi-muted leading-relaxed">{cert}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* CTA */}
-          <Link
-            href={`/booking?master=${master.id}`}
-            className="btn-primary w-full justify-center py-3.5 text-base"
-            onClick={onClose}
-          >
-            Записатись до {master.name.split(' ')[0]}
-          </Link>
+          </div>
         </div>
-          </div>{/* end right content */}
-        </div>{/* end flex row */}
       </div>
     </div>
   );
 }
 
-// ============ MASTER CARD ============
 function MasterCard({ master, onClick }: { master: Master; onClick: () => void }) {
   return (
     <div className="card-hover overflow-hidden group cursor-pointer" onClick={onClick}>
-      {/* Photo */}
       <div className="relative aspect-[4/5] overflow-hidden rounded-t-3xl">
-        <img
-          src={master.avatar}
-          alt={master.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        />
+        <img src={master.avatar} alt={master.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-
-        {/* Rating badge */}
-        <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-white/95 backdrop-blur-sm rounded-full px-3 py-1.5 shadow-soft">
+        <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-white/95 backdrop-blur-sm rounded-full px-2.5 py-1 shadow-soft">
           <svg className="w-3.5 h-3.5 fill-amber-400" viewBox="0 0 20 20">
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
           </svg>
           <span className="text-xs font-bold text-lumi-text">{master.rating}</span>
         </div>
-
-        {/* Name overlay */}
-        <div className="absolute bottom-4 left-4 right-4 text-white">
-          <h3 className="font-serif font-semibold text-xl leading-tight">{master.name}</h3>
-          <div className="flex flex-wrap gap-1 mt-1.5">
+        <div className="absolute bottom-3 left-3 right-3 text-white">
+          <h3 className="font-serif font-semibold text-lg leading-tight">{master.name}</h3>
+          <div className="flex flex-wrap gap-1 mt-1">
             {master.specializations.map((spec) => (
-              <span key={spec} className="text-xs bg-white/20 backdrop-blur-sm rounded-full px-2.5 py-1">
-                {spec}
-              </span>
+              <span key={spec} className="text-[11px] bg-white/20 backdrop-blur-sm rounded-full px-2 py-0.5">{spec}</span>
             ))}
           </div>
         </div>
       </div>
-
-      {/* Info */}
-      <div className="p-5">
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-lumi-cream flex items-center justify-center flex-shrink-0">
-              <Award className="w-4 h-4 text-lumi-rose" />
-            </div>
-            <div>
-              <p className="text-xs text-lumi-muted">Досвід</p>
-              <p className="text-sm font-semibold text-lumi-text">{master.experience} р.</p>
-            </div>
+      <div className="p-4">
+        <div className="grid grid-cols-2 gap-2 mb-3">
+          <div className="flex items-center gap-1.5">
+            <Award className="w-3.5 h-3.5 text-lumi-rose flex-shrink-0" />
+            <span className="text-xs text-lumi-muted">{master.experience} р. досвіду</span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-lumi-cream flex items-center justify-center flex-shrink-0">
-              <Star className="w-4 h-4 text-lumi-rose" />
-            </div>
-            <div>
-              <p className="text-xs text-lumi-muted">Відгуки</p>
-              <p className="text-sm font-semibold text-lumi-text">{master.reviewsCount}</p>
-            </div>
+          <div className="flex items-center gap-1.5">
+            <Star className="w-3.5 h-3.5 text-lumi-rose flex-shrink-0" />
+            <span className="text-xs text-lumi-muted">{master.reviewsCount} відгуків</span>
           </div>
         </div>
-
-        <p className="text-lumi-muted text-sm leading-relaxed line-clamp-2 mb-4">
-          {master.bio}
-        </p>
-
-        <div className="flex items-center gap-2 mb-4 text-xs text-lumi-muted">
-          <Clock className="w-3.5 h-3.5" />
-          <span>
-            {master.workingHours.start}–{master.workingHours.end}
-            {' · '}
-            {['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
-              .filter((_, i) => master.workingDays.includes(i))
-              .join(', ')}
+        <p className="text-lumi-muted text-xs leading-relaxed line-clamp-2 mb-3">{master.bio}</p>
+        <div className="flex items-center gap-1.5 mb-3 text-xs text-lumi-muted">
+          <Clock className="w-3 h-3 flex-shrink-0" />
+          <span className="truncate">
+            {master.workingHours.start}–{master.workingHours.end} · {['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'].filter((_, i) => master.workingDays.includes(i)).join(', ')}
           </span>
         </div>
-
         <div className="flex gap-2">
           <button
             onClick={e => { e.stopPropagation(); onClick(); }}
-            className="btn-outline flex-1 justify-center text-sm py-2"
+            className="btn-outline flex-1 justify-center text-xs py-1.5 px-2 min-w-0"
           >
             Детальніше
           </button>
           <Link
             href={`/booking?master=${master.id}`}
-            className="btn-primary flex-1 justify-center text-sm py-2"
+            className="btn-primary flex-1 justify-center text-xs py-1.5 px-2 min-w-0"
             onClick={e => e.stopPropagation()}
           >
             Записатись
@@ -313,29 +243,28 @@ function MasterCard({ master, onClick }: { master: Master; onClick: () => void }
   );
 }
 
-// ============ MASTERS PAGE ============
 export default function MastersPage() {
   const allMasters = useDataStore(s => s.masters);
-  const activeMasters = allMasters.filter(m => m.isActive !== false);
+  const categories = useDataStore(s => s.serviceCategories);
+  const activeMasters = allMasters.filter(m => m.isActive);
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [selectedMaster, setSelectedMaster] = useState<Master | null>(null);
 
   const filters = [
-    { id: 'all', label: 'Всі майстри' },
-    ...serviceCategories.map(c => ({ id: c.id, label: c.name })),
+    { id: 'all', label: 'Всі' },
+    ...categories.map(c => ({ id: c.id, label: c.name })),
   ];
 
   const filteredMasters = activeFilter === 'all'
     ? activeMasters
     : activeMasters.filter(m =>
         m.specializations.some(s =>
-          serviceCategories.find(c => c.id === activeFilter)?.name === s
+          categories.find(c => c.id === activeFilter)?.name === s
         )
       );
 
   return (
     <div className="bg-lumi-milk min-h-screen">
-      {/* Page Header */}
       <div className="bg-white border-b border-lumi-border">
         <div className="page-container py-10">
           <nav className="flex items-center gap-2 text-sm text-lumi-muted mb-4">
@@ -351,14 +280,13 @@ export default function MastersPage() {
       </div>
 
       <div className="page-container py-8">
-        {/* Filters */}
         <div className="flex flex-wrap gap-2 mb-8">
           {filters.map((filter) => (
             <button
               key={filter.id}
               onClick={() => setActiveFilter(filter.id)}
               className={cn(
-                'px-4 py-2 rounded-full text-sm font-medium transition-all duration-200',
+                'px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200',
                 activeFilter === filter.id
                   ? 'bg-lumi-rose text-white shadow-pink'
                   : 'bg-white text-lumi-muted hover:bg-lumi-cream hover:text-lumi-text shadow-soft'
@@ -369,7 +297,6 @@ export default function MastersPage() {
           ))}
         </div>
 
-        {/* Masters Grid */}
         {filteredMasters.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredMasters.map((master) => (
@@ -384,7 +311,6 @@ export default function MastersPage() {
         )}
       </div>
 
-      {/* Master Detail Modal */}
       {selectedMaster && (
         <MasterModal master={selectedMaster} onClose={() => setSelectedMaster(null)} />
       )}
