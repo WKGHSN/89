@@ -94,6 +94,11 @@ export const useBookingsStore = create<BookingsStore>()(
     }),
     {
       name: 'lumibeauty-bookings',
+      version: 2,
+      migrate: (persistedState: unknown, version: number) => {
+        if (version < 2) return undefined as unknown as BookingsStore;
+        return persistedState as BookingsStore;
+      },
       partialize: (state) => ({ bookings: state.bookings }),
     }
   )

@@ -6,6 +6,9 @@ import { mockUsers } from '@/data/mock';
 const AUTH_KEY = 'lumibeauty-auth';
 const USERS_KEY = 'lumibeauty-users';
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_REGEX = /^[\d+()\-\s]+$/;
+
 interface StoredUser {
   id: string;
   name: string;
@@ -117,6 +120,21 @@ export const useAuthStore = create<AuthStore>((set) => ({
   register: async (name, email, phone, password) => {
     set({ isLoading: true, error: null });
     await new Promise((r) => setTimeout(r, 400));
+
+    if (!EMAIL_REGEX.test(email)) {
+      set({ error: 'Введіть коректний email (наприклад: user@gmail.com)', isLoading: false });
+      return false;
+    }
+
+    if (phone && !PHONE_REGEX.test(phone)) {
+      set({ error: 'Телефон може містити лише цифри, +, пробіл, -, ()', isLoading: false });
+      return false;
+    }
+
+    if (phone && phone.replace(/[^\d]/g, '').length < 10) {
+      set({ error: 'Номер телефону повинен містити мінімум 10 цифр', isLoading: false });
+      return false;
+    }
 
     const users = getAllUsers();
     const exists = users.find((u) => u.email === email);

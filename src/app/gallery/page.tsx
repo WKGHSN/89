@@ -80,7 +80,6 @@ export default function GalleryPage() {
   const galleryItems = useDataStore(s => s.gallery);
   const categories = useDataStore(s => s.serviceCategories);
   const [activeFilter, setActiveFilter] = useState<string>('all');
-  const [activeMasterFilter, setActiveMasterFilter] = useState<string>('all');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const filters = [
@@ -88,13 +87,8 @@ export default function GalleryPage() {
     ...categories.map(c => ({ id: c.id, label: c.name })),
   ];
 
-  const galMasters = Array.from(
-    new Set(galleryItems.map(g => g.masterName).filter(Boolean))
-  );
-
   const filtered = galleryItems
-    .filter(g => activeFilter === 'all' || g.categoryId === activeFilter)
-    .filter(g => activeMasterFilter === 'all' || g.masterName === activeMasterFilter);
+    .filter(g => activeFilter === 'all' || g.categoryId === activeFilter);
 
   const openLightbox = (idx: number) => setLightboxIndex(idx);
   const closeLightbox = () => setLightboxIndex(null);
@@ -116,7 +110,7 @@ export default function GalleryPage() {
       </div>
 
       <div className="page-container py-8">
-        <div className="flex flex-wrap gap-2 mb-3">
+        <div className="flex flex-wrap gap-2 mb-8">
           {filters.map((f) => (
             <button
               key={f.id}
@@ -132,36 +126,6 @@ export default function GalleryPage() {
             </button>
           ))}
         </div>
-
-        {galMasters.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-8">
-            <button
-              onClick={() => setActiveMasterFilter('all')}
-              className={cn(
-                'px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200',
-                activeMasterFilter === 'all'
-                  ? 'bg-lumi-text text-white'
-                  : 'bg-white text-lumi-muted hover:bg-lumi-cream hover:text-lumi-text shadow-soft'
-              )}
-            >
-              👩‍🎨 Всі майстри
-            </button>
-            {galMasters.map(masterName => (
-              <button
-                key={masterName}
-                onClick={() => setActiveMasterFilter(masterName!)}
-                className={cn(
-                  'px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200',
-                  activeMasterFilter === masterName
-                    ? 'bg-lumi-text text-white'
-                    : 'bg-white text-lumi-muted hover:bg-lumi-cream hover:text-lumi-text shadow-soft'
-                )}
-              >
-                {masterName}
-              </button>
-            ))}
-          </div>
-        )}
 
         <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
           {filtered.map((item, idx) => (

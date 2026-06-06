@@ -14,7 +14,6 @@ import { generateTimeSlots } from '@/data/mock';
 import { formatPrice, formatDuration, formatDate, cn, generateCalendarDays, MONTHS_UK, WEEKDAYS_UK } from '@/lib/utils';
 import type { Service, Master } from '@/types';
 
-// ============ STEP INDICATOR ============
 const STEPS = [
   { id: 1, label: 'Послуга' },
   { id: 2, label: 'Майстер' },
@@ -56,7 +55,6 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
   );
 }
 
-// ============ BOOKING SUMMARY SIDEBAR ============
 function BookingSummary() {
   const { selectedService, selectedCategory, selectedMaster, selectedDate, selectedTime } = useBookingWizardStore();
   if (!selectedService && !selectedMaster && !selectedDate) return null;
@@ -110,7 +108,6 @@ function BookingSummary() {
   );
 }
 
-// ============ STEP 1: SELECT SERVICE ============
 function Step1({ onNext }: { onNext: () => void }) {
   const serviceCategories = useDataStore(s => s.serviceCategories);
   const [activeCategory, setActiveCategory] = useState<string>(serviceCategories[0]?.id || '');
@@ -170,7 +167,6 @@ function Step1({ onNext }: { onNext: () => void }) {
   );
 }
 
-// ============ STEP 2: SELECT MASTER ============
 function Step2({ onNext }: { onNext: () => void }) {
   const { selectedCategory, setMaster } = useBookingWizardStore();
   const allMasters = useDataStore(s => s.masters);
@@ -216,7 +212,6 @@ function Step2({ onNext }: { onNext: () => void }) {
   );
 }
 
-// ============ STEP 3: SELECT DATE ============
 function Step3({ onNext }: { onNext: () => void }) {
   const { setDate, selectedMaster } = useBookingWizardStore();
   const now = new Date();
@@ -308,7 +303,6 @@ function Step3({ onNext }: { onNext: () => void }) {
   );
 }
 
-// ============ STEP 4: SELECT TIME ============
 function Step4({ onNext }: { onNext: () => void }) {
   const { selectedDate, selectedMaster, selectedTime, setTime } = useBookingWizardStore();
   const allBookings = useBookingsStore(s => s.bookings);
@@ -355,7 +349,6 @@ function Step4({ onNext }: { onNext: () => void }) {
   );
 }
 
-// ============ STEP 5: CONFIRM ============
 function Step5({ onConfirm }: { onConfirm: () => void }) {
   const store = useBookingWizardStore();
   const [name, setName] = useState('');
@@ -366,29 +359,56 @@ function Step5({ onConfirm }: { onConfirm: () => void }) {
   const [emailError, setEmailError] = useState('');
   const [phoneError, setPhoneError] = useState('');
 
+  const validateEmail = (val: string): string => {
+    if (!val) return 'Email є обов\'язковим';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(val)) return 'Введіть коректний email (наприклад: user@gmail.com)';
+    return '';
+  };
+
   const handleEmailChange = (val: string) => {
     setEmail(val);
-    setEmailError(val && !val.includes('@') ? 'Email повинен містити символ @' : '');
+    setEmailError(val ? validateEmail(val) : '');
   };
 
   const handlePhoneChange = (val: string) => {
     const cleaned = val.replace(/[^\d+()\-\s]/g, '');
     setPhone(cleaned);
-    setPhoneError(cleaned && cleaned.replace(/[^\d]/g, '').length < 10 ? 'Введіть коректний номер телефону' : '');
+    if (val !== cleaned) {
+      setPhoneError('Телефон може містити лише цифри, +, пробіл, -, ()');
+    } else if (cleaned && cleaned.replace(/[^\d]/g, '').length < 10) {
+      setPhoneError('Введіть коректний номер телефону (мін. 10 цифр)');
+    } else {
+      setPhoneError('');
+    }
   };
 
   const handleSubmit = () => {
     const n = name.trim();
     const p = phone.trim();
     const e = email.trim();
-    if (!n) { toast.error("Введіть ваше ім'я"); return; }
-    if (!p) { toast.error('Введіть номер телефону'); return; }
-    if (p.replace(/[^\d]/g, '').length < 10) { toast.error('Введіть коректний номер телефону'); return; }
-    if (e && !e.includes('@')) { toast.error('Email повинен містити символ @'); return; }
-    if (!agreed) { toast.error('Підтвердіть згоду з правилами'); return; }
+    const errors: string[] = [];
+
+    if (!n) errors.push("Ім'я та прізвище");
+    if (!p) errors.push('Телефон');
+    else if (p.replace(/[^\d]/g, '').length < 10) { toast.error('Введіть коректний номер телефону (мін. 10 цифр)'); return; }
+    if (!e) errors.push('Email');
+    else {
+      const emailErr = validateEmail(e);
+      if (emailErr) { toast.error(emailErr); return; }
+    }
+    if (!agreed) errors.push('Згода з правилами');
+
+    if (errors.length > 0) {
+      toast.error(`Заповніть обов'язкові поля: ${errors.join(', ')}`);
+      return;
+    }
+
     store.setClientInfo({ clientName: n, clientPhone: p, clientEmail: e, notes: notes.trim() });
     onConfirm();
   };
+
+  const isFormValid = name.trim() && phone.trim() && phone.replace(/[^\d]/g, '').length >= 10 && email.trim() && !validateEmail(email.trim()) && agreed && !phoneError && !emailError;
 
   const { selectedService, selectedCategory, selectedMaster, selectedDate, selectedTime } = store;
 
@@ -450,7 +470,7 @@ function Step5({ onConfirm }: { onConfirm: () => void }) {
             {phoneError && <p className="text-xs text-red-500 mt-1">{phoneError}</p>}
           </div>
           <div className="sm:col-span-2">
-            <label className="text-xs text-lumi-muted font-medium block mb-1.5">Email</label>
+            <label className="text-xs text-lumi-muted font-medium block mb-1.5">Email *</label>
             <input
               type="text"
               inputMode="email"
@@ -487,14 +507,20 @@ function Step5({ onConfirm }: { onConfirm: () => void }) {
         </p>
       </label>
 
-      <button onClick={handleSubmit} className="btn-primary w-full justify-center py-4 text-base">
+      <button
+        onClick={handleSubmit}
+        disabled={!isFormValid}
+        className={cn(
+          'btn-primary w-full justify-center py-4 text-base',
+          !isFormValid && 'opacity-50 cursor-not-allowed'
+        )}
+      >
         Підтвердити запис <ChevronRight className="w-4 h-4" />
       </button>
     </div>
   );
 }
 
-// ============ SUCCESS POPUP ============
 function SuccessPopup({ onClose, onGoBookings }: { onClose: () => void; onGoBookings: () => void }) {
   const { selectedService, selectedMaster, selectedDate, selectedTime } = useBookingWizardStore();
 
@@ -541,7 +567,6 @@ function SuccessPopup({ onClose, onGoBookings }: { onClose: () => void; onGoBook
   );
 }
 
-// ============ ROLE BLOCK PAGE ============
 function RoleBlockedPage({ role }: { role: string }) {
   const dashLink = role === 'admin' ? '/dashboard/admin' : '/dashboard/master';
   return (
@@ -562,7 +587,6 @@ function RoleBlockedPage({ role }: { role: string }) {
   );
 }
 
-// ============ MAIN BOOKING PAGE ============
 export default function BookingPage() {
   const store = useBookingWizardStore();
   const { addBooking } = useBookingsStore();
@@ -578,6 +602,18 @@ export default function BookingPage() {
 
   const handleConfirm = () => {
     if (!selectedService || !selectedMaster || !selectedDate || !selectedTime) return;
+
+    const hasConflict = useBookingsStore.getState().hasTimeConflict(
+      selectedMaster.id,
+      selectedDate,
+      selectedTime,
+      selectedService.duration
+    );
+
+    if (hasConflict) {
+      toast.error('На цей час вже є запис. Оберіть інший час або дату.');
+      return;
+    }
 
     const newBooking = addBooking({
       clientId: user?.id || 'guest',

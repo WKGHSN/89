@@ -125,6 +125,11 @@ export const useDataStore = create<DataStore>()(
     }),
     {
       name: 'lumibeauty-data',
+      version: 2,
+      migrate: (persistedState: unknown, version: number) => {
+        if (version < 2) return undefined as unknown as DataStore;
+        return persistedState as DataStore;
+      },
       partialize: (state) => ({
         serviceCategories: state.serviceCategories,
         services: state.services,

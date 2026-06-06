@@ -13,13 +13,48 @@ function RegisterPageInner() {
   const { register, isLoading, error, clearError } = useAuthStore();
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', confirmPassword: '' });
   const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
 
-  const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm(f => ({ ...f, [field]: e.target.value }));
+  const validateEmailField = (val: string): string => {
+    if (!val) return '';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(val)) return 'Введіть коректний email (наприклад: user@gmail.com)';
+    return '';
+  };
+
+  const validatePhoneField = (val: string): string => {
+    if (!val) return '';
+    const phoneRegex = /^[\d+()\-\s]+$/;
+    if (!phoneRegex.test(val)) return 'Телефон може містити лише цифри, +, пробіл, -, ()';
+    if (val.replace(/[^\d]/g, '').length < 10) return 'Номер телефону повинен містити мінімум 10 цифр';
+    return '';
+  };
+
+  const update = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (field === 'email') {
+      setEmailError(validateEmailField(val));
+    }
+    if (field === 'phone') {
+      const cleaned = val.replace(/[^\d+()\-\s]/g, '');
+      setPhoneError(val !== cleaned ? 'Телефон може містити лише цифри, +, пробіл, -, ()' : validatePhoneField(cleaned));
+      setForm(f => ({ ...f, phone: cleaned }));
+      return;
+    }
+    setForm(f => ({ ...f, [field]: val }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
+
+    const emailErr = validateEmailField(form.email);
+    if (emailErr) { setEmailError(emailErr); toast.error(emailErr); return; }
+
+    const phoneErr = validatePhoneField(form.phone);
+    if (phoneErr) { setPhoneError(phoneErr); toast.error(phoneErr); return; }
+
     if (form.password !== form.confirmPassword) {
       toast.error('Паролі не співпадають');
       return;
@@ -94,11 +129,12 @@ function RegisterPageInner() {
               <input
                 type="email"
                 required
-                className="input-field"
+                className={`input-field ${emailError ? 'border-red-400 focus:ring-red-200' : ''}`}
                 placeholder="your@email.com"
                 value={form.email}
                 onChange={update('email')}
               />
+              {emailError && <p className="text-xs text-red-500 mt-1">{emailError}</p>}
             </div>
 
             <div>
@@ -106,11 +142,13 @@ function RegisterPageInner() {
               <input
                 type="tel"
                 required
-                className="input-field"
+                className={`input-field ${phoneError ? 'border-red-400 focus:ring-red-200' : ''}`}
                 placeholder="+38 (0__) ___-__-__"
                 value={form.phone}
                 onChange={update('phone')}
+                inputMode="tel"
               />
+              {phoneError && <p className="text-xs text-red-500 mt-1">{phoneError}</p>}
             </div>
 
             <div>
