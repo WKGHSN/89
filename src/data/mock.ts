@@ -1,9 +1,5 @@
 import type { ServiceCategory, Service, Master, Review, GalleryItem, ContactInfo, Booking } from '@/types';
 
-function gdriveDirectUrl(fileId: string): string {
-  return `https://drive.google.com/uc?export=view&id=${fileId}`;
-}
-
 export const serviceCategories: ServiceCategory[] = [
   {
     id: 'manicure',
@@ -72,8 +68,8 @@ export const services: Service[] = [
   { id: 'brow-5', categoryId: 'eyebrows', name: 'Перманентний макіяж брів', description: 'Нанесення пігменту технікою пудрових брів', duration: 180, price: 2500, isActive: true },
 
   { id: 'lash-1', categoryId: 'lashes', name: 'Нарощування (класика)', description: 'Класичне нарощування — по одній вії на кожну', duration: 120, price: 800, isActive: true },
-  { id: 'lash-2', categoryId: 'lashes', name: 'Нарощування (2D-3D)', description: 'Об\'ємне нарощування для вираженого ефекту', duration: 150, price: 1100, isActive: true },
-  { id: 'lash-3', categoryId: 'lashes', name: 'Нарощування (Мегаоб\'єм)', description: 'Мегаоб\'ємне нарощування для максимального ефекту', duration: 180, price: 1400, isActive: true },
+  { id: 'lash-2', categoryId: 'lashes', name: 'Нарощування (2D-3D)', description: "Об'ємне нарощування для вираженого ефекту", duration: 150, price: 1100, isActive: true },
+  { id: 'lash-3', categoryId: 'lashes', name: "Нарощування (Мегаоб'єм)", description: "Мегаоб'ємне нарощування для максимального ефекту", duration: 180, price: 1400, isActive: true },
   { id: 'lash-4', categoryId: 'lashes', name: 'Корекція вій', description: 'Підправлення через 3-4 тижні після нарощування', duration: 90, price: 600, isActive: true },
   { id: 'lash-5', categoryId: 'lashes', name: 'Ламінування вій', description: 'Завивання та зміцнення натуральних вій', duration: 90, price: 700, isActive: true },
   { id: 'lash-6', categoryId: 'lashes', name: 'Ботокс для вій', description: 'Відновлення та зміцнення натуральних вій', duration: 60, price: 500, isActive: true },
@@ -155,7 +151,7 @@ export const reviews: Review[] = [
     masterName: 'Олена Ковальчук',
     serviceName: 'Манікюр + Дизайн',
     rating: 5,
-    text: 'Просто захоплена роботою Олени! Дизайн вийшов навіть кращим, ніж я уявляла. Майстриня дуже уважна до деталей, а атмосфера в салоні просто неймовірна. Повернусь обов\'язково!',
+    text: "Просто захоплена роботою Олени! Дизайн вийшов навіть кращим, ніж я уявляла. Майстриня дуже уважна до деталей, а атмосфера в салоні просто неймовірна. Повернусь обов'язково!",
     createdAt: '2024-07-15',
   },
   {
@@ -218,26 +214,25 @@ export const reviews: Review[] = [
 ];
 
 export const galleryItems: GalleryItem[] = [
-  { id: 'g-m1', imageUrl: gdriveDirectUrl('1jj70aun_WMVjteCp1ZS0gaP6U1sbZ6g8'), categoryId: 'manicure', categoryName: 'Манікюр', masterName: 'Олена Ковальчук', description: 'Ніжний манікюр з натуральним покриттям', createdAt: '2024-08-01' },
-  { id: 'g-m2', imageUrl: gdriveDirectUrl('1DTRg8xw19nneOVeMwcGGBhZY1zKt9BOP'), categoryId: 'manicure', categoryName: 'Манікюр', masterName: 'Олена Ковальчук', description: 'Стильний дизайн нігтів', createdAt: '2024-08-02' },
-  { id: 'g-m3', imageUrl: gdriveDirectUrl('1rXX11l5yA6cbDrB_8vVBZNEL1oWcB6kj'), categoryId: 'manicure', categoryName: 'Манікюр', masterName: 'Вікторія Лисенко', description: 'Класичний манікюр з гель-лаком', createdAt: '2024-08-03' },
-  { id: 'g-m4', imageUrl: gdriveDirectUrl('1Zv3oTva2KyuKaQ6YnuHwn6aQMMpSyN8b'), categoryId: 'manicure', categoryName: 'Манікюр', masterName: 'Вікторія Лисенко', description: 'Мінімалістичний nail-art', createdAt: '2024-08-04' },
-  { id: 'g-m5', imageUrl: gdriveDirectUrl('1vnAuHTqfqkGfFZNbFyIadi8cwaGuAbGc'), categoryId: 'manicure', categoryName: 'Манікюр', masterName: 'Олена Ковальчук', description: 'Французький манікюр', createdAt: '2024-08-05' },
+  // МАНІКЮР
+  { id: 'g-m1', imageUrl: '/gallery/manicure-1.jpg', categoryId: 'manicure', categoryName: 'Манікюр', masterName: 'Олена Ковальчук', description: 'Ніжний манікюр з натуральним покриттям', createdAt: '2024-08-01' },
+  { id: 'g-m2', imageUrl: '/gallery/manicure-2.jpg', categoryId: 'manicure', categoryName: 'Манікюр', masterName: 'Олена Ковальчук', description: 'Стильний дизайн нігтів', createdAt: '2024-08-02' },
+  { id: 'g-m3', imageUrl: '/gallery/manicure-3.jpg', categoryId: 'manicure', categoryName: 'Манікюр', masterName: 'Вікторія Лисенко', description: 'Класичний манікюр з гель-лаком', createdAt: '2024-08-03' },
+  { id: 'g-m4', imageUrl: '/gallery/manicure-4.jpg', categoryId: 'manicure', categoryName: 'Манікюр', masterName: 'Вікторія Лисенко', description: 'Мінімалістичний nail-art', createdAt: '2024-08-04' },
+  { id: 'g-m5', imageUrl: '/gallery/manicure-5.jpg', categoryId: 'manicure', categoryName: 'Манікюр', masterName: 'Олена Ковальчук', description: 'Французький манікюр', createdAt: '2024-08-05' },
 
-  { id: 'g-b1', imageUrl: gdriveDirectUrl('1S--USWmtQVghIKEYVclnPQpU8sl1lZN1'), categoryId: 'eyebrows', categoryName: 'Брови', masterName: 'Марина Бондаренко', description: 'Архітектура брів з фарбуванням', createdAt: '2024-08-06' },
-  { id: 'g-b2', imageUrl: gdriveDirectUrl('1IeLIDukomeno4Hk3UrHbJ8fA15SBon2j'), categoryId: 'eyebrows', categoryName: 'Брови', masterName: 'Марина Бондаренко', description: 'Корекція та ламінування брів', createdAt: '2024-08-07' },
-  { id: 'g-b3', imageUrl: gdriveDirectUrl('1OGUpmRGOD97Z4I4p-ILCURv-SQc3BPig'), categoryId: 'eyebrows', categoryName: 'Брови', masterName: 'Вікторія Лисенко', description: 'Природна форма брів', createdAt: '2024-08-08' },
+  // БРОВИ
+  { id: 'g-b1', imageUrl: '/gallery/brows-1.jpg', categoryId: 'eyebrows', categoryName: 'Брови', masterName: 'Марина Бондаренко', description: 'Архітектура брів з фарбуванням', createdAt: '2024-08-06' },
+  { id: 'g-b2', imageUrl: '/gallery/brows-2.jpg', categoryId: 'eyebrows', categoryName: 'Брови', masterName: 'Марина Бондаренко', description: 'Корекція та ламінування брів', createdAt: '2024-08-07' },
 
-  { id: 'g-l1', imageUrl: gdriveDirectUrl('18FkNpOCvubKgYoAmRA_TR5-gotqndZU_'), categoryId: 'lashes', categoryName: 'Вії', masterName: 'Марина Бондаренко', description: 'Класичне нарощування вій', createdAt: '2024-08-09' },
-  { id: 'g-l2', imageUrl: gdriveDirectUrl('1wLCGTFFaqlYA5eRwnd3a-liGVc-8jZPk'), categoryId: 'lashes', categoryName: 'Вії', masterName: 'Марина Бондаренко', description: 'Об\'ємне нарощування 2D', createdAt: '2024-08-10' },
-  { id: 'g-l3', imageUrl: gdriveDirectUrl('1e4sCZmuiyaqQXenFKBztGzR6OV-KSoV_'), categoryId: 'lashes', categoryName: 'Вії', masterName: 'Марина Бондаренко', description: 'Ламінування та ботокс вій', createdAt: '2024-08-11' },
-  { id: 'g-l4', imageUrl: gdriveDirectUrl('1_5vjHIJcx68H_CsNBdOqUNWb8iz7VSj4'), categoryId: 'lashes', categoryName: 'Вії', masterName: 'Марина Бондаренко', description: 'Мегаоб\'ємне нарощування', createdAt: '2024-08-12' },
+  // ВІЇ
+  { id: 'g-l1', imageUrl: '/gallery/lashes-1.jpg', categoryId: 'lashes', categoryName: 'Вії', masterName: 'Марина Бондаренко', description: 'Класичне нарощування вій', createdAt: '2024-08-09' },
+  { id: 'g-l2', imageUrl: '/gallery/lashes-2.jpg', categoryId: 'lashes', categoryName: 'Вії', masterName: 'Марина Бондаренко', description: "Об'ємне нарощування 2D", createdAt: '2024-08-10' },
+  { id: 'g-l3', imageUrl: '/gallery/lashes-3.jpg', categoryId: 'lashes', categoryName: 'Вії', masterName: 'Марина Бондаренко', description: 'Ламінування та ботокс вій', createdAt: '2024-08-11' },
 
-  { id: 'g-h1', imageUrl: gdriveDirectUrl('14QuDhiHwrk-xXbgEBiBOpKV5YcXGdnS-'), categoryId: 'haircare', categoryName: 'Стрижки', masterName: 'Соломія Петренко', description: 'Жіноча стрижка з укладкою', createdAt: '2024-08-13' },
-  { id: 'g-h2', imageUrl: gdriveDirectUrl('1tZCrAVE3SGfyr8uxQJT5Dmgotp7i905c'), categoryId: 'haircare', categoryName: 'Стрижки', masterName: 'Соломія Петренко', description: 'Каскадна стрижка', createdAt: '2024-08-14' },
-  { id: 'g-h3', imageUrl: gdriveDirectUrl('1gsGm15JgNS5U8Vzp89yT5nSAaQjsiRO0'), categoryId: 'haircare', categoryName: 'Стрижки', masterName: 'Соломія Петренко', description: 'Фарбування та мелірування', createdAt: '2024-08-15' },
-  { id: 'g-h4', imageUrl: gdriveDirectUrl('1XaKWGINtAbwFgVKyK2V0c9WvR8WY7tVp'), categoryId: 'haircare', categoryName: 'Стрижки', masterName: 'Соломія Петренко', description: 'Укладка та стайлінг', createdAt: '2024-08-16' },
-  { id: 'g-h5', imageUrl: gdriveDirectUrl('1P8ailYhBkrsRfgLhOJ6TlpTpxqnFegXM'), categoryId: 'haircare', categoryName: 'Стрижки', masterName: 'Соломія Петренко', description: 'Кератинове випрямлення', createdAt: '2024-08-17' },
+  // СТРИЖКИ
+  { id: 'g-h1', imageUrl: '/gallery/haircut-1.jpg', categoryId: 'haircare', categoryName: 'Стрижки', masterName: 'Соломія Петренко', description: 'Жіноча стрижка з укладкою', createdAt: '2024-08-13' },
+  { id: 'g-h2', imageUrl: '/gallery/haircut-2.jpg', categoryId: 'haircare', categoryName: 'Стрижки', masterName: 'Соломія Петренко', description: 'Каскадна стрижка', createdAt: '2024-08-14' },
 ];
 
 export const contactInfo: ContactInfo = {
