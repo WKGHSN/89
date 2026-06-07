@@ -118,7 +118,7 @@ function RegisterPageInner() {
                 type="text"
                 required
                 className="input-field"
-                placeholder="Анна Мороз"
+                placeholder="Ім'я та прізвище"
                 value={form.name}
                 onChange={update('name')}
               />

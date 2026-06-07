@@ -351,9 +351,21 @@ function Step4({ onNext }: { onNext: () => void }) {
 
 function Step5({ onConfirm }: { onConfirm: () => void }) {
   const store = useBookingWizardStore();
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
+  const { user } = useAuthStore();
+
+  const getStoredPhone = (): string => {
+    if (typeof window === 'undefined') return '';
+    try {
+      const raw = localStorage.getItem('lumibeauty-users');
+      if (!raw) return '';
+      const users = JSON.parse(raw) as { id: string; phone?: string }[];
+      return users.find(u => u.id === user?.id)?.phone || '';
+    } catch { return ''; }
+  };
+
+  const [name, setName] = useState(user?.name || '');
+  const [phone, setPhone] = useState(getStoredPhone);
+  const [email, setEmail] = useState(user?.email || '');
   const [notes, setNotes] = useState('');
   const [agreed, setAgreed] = useState(false);
   const [emailError, setEmailError] = useState('');
@@ -454,7 +466,7 @@ function Step5({ onConfirm }: { onConfirm: () => void }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="text-xs text-lumi-muted font-medium block mb-1.5">Ім&apos;я та прізвище *</label>
-            <input className="input-field" placeholder="Наприклад: Анна Мороз" value={name} onChange={e => setName(e.target.value)} autoComplete="off" />
+            <input className="input-field" placeholder="Ім'я та прізвище" value={name} onChange={e => setName(e.target.value)} autoComplete="off" />
           </div>
           <div>
             <label className="text-xs text-lumi-muted font-medium block mb-1.5">Телефон *</label>
@@ -615,10 +627,11 @@ export default function BookingPage() {
       return;
     }
 
-    const newBooking = addBooking({
-      clientId: user?.id || 'guest',
-      clientName: store.clientName,
-      clientPhone: store.clientPhone,
+    const state = useBookingWizardStore.getState();
+const newBooking = addBooking({
+  clientId: user?.id || 'guest',
+  clientName: state.clientName,
+  clientPhone: state.clientPhone,
       masterId: selectedMaster.id,
       masterName: selectedMaster.name,
       serviceId: selectedService.id,

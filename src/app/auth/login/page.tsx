@@ -25,23 +25,14 @@ function LoginPageInner() {
     }
   };
 
-  const demoAccounts = [
-    { label: 'Клієнт', email: 'client@test.com', pass: 'client123', icon: '👤' },
-    { label: 'Адмін', email: 'admin@lumibeauty.com', pass: 'admin123', icon: '⚙️' },
-    { label: 'Майстер', email: 'olena@lumibeauty.com', pass: 'master123', icon: '💅' },
-  ];
-
   return (
     <div className="min-h-screen bg-lumi-milk flex items-center justify-center px-4 py-16">
       <div className="w-full max-w-md">
-        {/* Back */}
         <Link href="/" className="inline-flex items-center gap-2 text-sm text-lumi-muted hover:text-lumi-text mb-8 transition-colors">
           <ArrowLeft className="w-4 h-4" /> Повернутись
         </Link>
 
-        {/* Card */}
         <div className="bg-white rounded-3xl shadow-card p-8 md:p-10">
-          {/* Logo */}
           <div className="flex items-center gap-2 mb-8">
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-lumi-blush to-lumi-rose flex items-center justify-center">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -121,23 +112,6 @@ function LoginPageInner() {
               ) : 'Увійти'}
             </button>
           </form>
-
-          {/* Demo accounts */}
-          <div className="mt-6 pt-6 border-t border-lumi-border">
-            <p className="text-xs text-lumi-muted text-center mb-3">Демо акаунти:</p>
-            <div className="grid grid-cols-3 gap-2">
-              {demoAccounts.map(acc => (
-                <button
-                  key={acc.label}
-                  onClick={() => { setEmail(acc.email); setPassword(acc.pass); }}
-                  className="flex flex-col items-center gap-1 p-3 rounded-2xl bg-lumi-milk hover:bg-lumi-cream transition-colors text-center"
-                >
-                  <span className="text-lg">{acc.icon}</span>
-                  <span className="text-xs font-medium text-lumi-text">{acc.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </div>
