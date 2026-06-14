@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Calendar, Users, BarChart3, Settings, LogOut, Plus, Search, ChevronRight, Clock, Upload, X, GripVertical, Pencil } from 'lucide-react';
+import { Calendar, Users, BarChart3, Settings, LogOut, Plus, Search, ChevronRight, Clock, Upload, X, GripVertical, Pencil, Trash2 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useBookingsStore } from '@/store/bookingsStore';
 import { useDataStore } from '@/store/dataStore';
@@ -27,6 +27,8 @@ interface BookingsTabProps {
   setSearchQuery: (q: string) => void;
   updateStatus: (id: string, status: 'confirmed' | 'completed' | 'cancelled' | 'pending') => void;
   cancelBooking: (id: string) => void;
+  deleteBooking: (id: string) => void;
+  addBooking: (data: Omit<Booking, 'id' | 'createdAt'>) => Booking;
 }
 
 export default function AdminDashboard() {
@@ -35,6 +37,9 @@ export default function AdminDashboard() {
   const allBookings = useBookingsStore(s => s.bookings);
   const updateStatus = useBookingsStore(s => s.updateStatus);
   const cancelBooking = useBookingsStore(s => s.cancelBooking);
+  const addBooking = useBookingsStore(s => s.addBooking);
+  const { bookings: _, ...bookingsStore } = useBookingsStore();
+  const deleteBooking = useBookingsStore(s => s.deleteBooking);
   const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
   const [searchQuery, setSearchQuery] = useState('');
   const [mounted, setMounted] = useState(false);
@@ -57,7 +62,7 @@ export default function AdminDashboard() {
 
   const filteredBookings = allBookings.filter(b =>
     !searchQuery ||
-    b.clientName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    b.clientName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     b.masterName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     b.serviceName.toLowerCase().includes(searchQuery.toLowerCase())
   ).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
@@ -121,7 +126,7 @@ export default function AdminDashboard() {
 
           <div className="flex-1 min-w-0">
             {activeTab === 'dashboard' && <DashboardTab allBookings={allBookings} todayBookings={todayBookings} pendingCount={pendingCount} totalRevenue={totalRevenue} updateStatus={updateStatus} />}
-            {activeTab === 'bookings' && <BookingsTab bookings={filteredBookings} searchQuery={searchQuery} setSearchQuery={setSearchQuery} updateStatus={updateStatus} cancelBooking={cancelBooking} />}
+            {activeTab === 'bookings' && <BookingsTab bookings={filteredBookings} searchQuery={searchQuery} setSearchQuery={setSearchQuery} updateStatus={updateStatus} cancelBooking={cancelBooking} deleteBooking={deleteBooking} addBooking={addBooking} />}
             {activeTab === 'services' && <ServicesTab />}
             {activeTab === 'masters' && <MastersTab />}
             {activeTab === 'gallery' && <GalleryTab />}
@@ -211,13 +216,132 @@ function DashboardTab({ allBookings, todayBookings, pendingCount, totalRevenue, 
   );
 }
 
-function BookingsTab({ bookings, searchQuery, setSearchQuery, updateStatus, cancelBooking }: BookingsTabProps) {
+function BookingsTab({ bookings, searchQuery, setSearchQuery, updateStatus, cancelBooking, deleteBooking, addBooking }: BookingsTabProps) {
+  const services = useDataStore(s => s.services);
+  const masters = useDataStore(s => s.masters);
+  const categories = useDataStore(s => s.serviceCategories);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({
+    clientName: '',
+    clientPhone: '',
+    serviceId: services[0]?.id || '',
+    masterId: masters[0]?.id || '',
+    date: '',
+    time: '',
+    notes: '',
+  });
+
+  const cancelledCount = bookings.filter(b => b.status === 'cancelled').length;
+
+  const deleteCancelled = () => {
+    bookings.filter(b => b.status === 'cancelled').forEach(b => deleteBooking(b.id));
+    toast.success(`Видалено ${cancelledCount} скасованих записів`);
+  };
+
+  const selectedService = services.find(s => s.id === form.serviceId);
+  const selectedMaster = masters.find(m => m.id === form.masterId);
+
+  const handleAddBooking = () => {
+    if (!form.clientName || !form.clientPhone || !form.serviceId || !form.masterId || !form.date || !form.time) {
+      toast.error('Заповніть всі обов\'язкові поля');
+      return;
+    }
+    const cat = categories.find(c => c.id === selectedService?.categoryId);
+    addBooking({
+      clientId: 'admin-created',
+      clientName: form.clientName,
+      clientPhone: form.clientPhone,
+      masterId: form.masterId,
+      masterName: selectedMaster?.name || '',
+      serviceId: form.serviceId,
+      serviceName: selectedService?.name || '',
+      categoryName: cat?.name || '',
+      date: form.date,
+      time: form.time,
+      duration: selectedService?.duration || 60,
+      price: selectedService?.price || 0,
+      status: 'confirmed',
+      notes: form.notes,
+    });
+    setForm({ clientName: '', clientPhone: '', serviceId: services[0]?.id || '', masterId: masters[0]?.id || '', date: '', time: '', notes: '' });
+    setShowForm(false);
+    toast.success('Запис створено і підтверджено');
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <h2 className="font-serif font-medium text-lumi-text text-2xl">Всі записи</h2>
-        <Link href="/booking" className="btn-primary text-sm"><Plus className="w-4 h-4" /> Новий запис</Link>
+        <div className="flex gap-2">
+          {cancelledCount > 0 && (
+            <button onClick={deleteCancelled} className="btn-outline text-sm text-red-500 border-red-200 hover:bg-red-50">
+              <Trash2 className="w-4 h-4" /> Видалити скасовані ({cancelledCount})
+            </button>
+          )}
+          <button onClick={() => setShowForm(!showForm)} className="btn-primary text-sm">
+            <Plus className="w-4 h-4" /> Новий запис
+          </button>
+        </div>
       </div>
+
+      {showForm && (
+        <div className="bg-white rounded-2xl shadow-soft p-5 border-2 border-lumi-blush">
+          <h3 className="font-medium text-lumi-text mb-4">Новий запис від адміністратора</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-lumi-muted block mb-1">Ім'я клієнта *</label>
+              <input className="input-field" placeholder="Ім'я та прізвище" value={form.clientName} onChange={e => setForm(p => ({ ...p, clientName: e.target.value }))} />
+            </div>
+            <div>
+              <label className="text-xs text-lumi-muted block mb-1">Телефон *</label>
+              <input className="input-field" placeholder="+38 (0__) ___-__-__" value={form.clientPhone} onChange={e => setForm(p => ({ ...p, clientPhone: e.target.value }))} inputMode="tel" />
+            </div>
+            <div>
+              <label className="text-xs text-lumi-muted block mb-1">Послуга *</label>
+              <select className="input-field" value={form.serviceId} onChange={e => setForm(p => ({ ...p, serviceId: e.target.value }))}>
+                {services.filter(s => s.isActive).map(s => (
+                  <option key={s.id} value={s.id}>{s.name} — {formatPrice(s.price)}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-lumi-muted block mb-1">Майстер *</label>
+              <select className="input-field" value={form.masterId} onChange={e => setForm(p => ({ ...p, masterId: e.target.value }))}>
+                {masters.filter(m => m.isActive).map(m => (
+                  <option key={m.id} value={m.id}>{m.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs text-lumi-muted block mb-1">Дата *</label>
+              <input className="input-field" type="date" value={form.date} onChange={e => setForm(p => ({ ...p, date: e.target.value }))} min={new Date().toISOString().split('T')[0]} />
+            </div>
+            <div>
+              <label className="text-xs text-lumi-muted block mb-1">Час *</label>
+              <select className="input-field" value={form.time} onChange={e => setForm(p => ({ ...p, time: e.target.value }))}>
+                <option value="">— Оберіть час —</option>
+                {['09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30'].map(t => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
+            <div className="sm:col-span-2">
+              <label className="text-xs text-lumi-muted block mb-1">Коментар</label>
+              <input className="input-field" placeholder="Примітки..." value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} />
+            </div>
+          </div>
+          {selectedService && (
+            <p className="text-xs text-lumi-muted mt-3">
+              Тривалість: {selectedService.duration} хв · Ціна: {formatPrice(selectedService.price)}
+            </p>
+          )}
+          <div className="flex gap-2 mt-4">
+            <button onClick={handleAddBooking} className="btn-primary text-sm">Створити запис</button>
+            <button onClick={() => setShowForm(false)} className="btn-outline text-sm">Скасувати</button>
+          </div>
+        </div>
+      )}
+
       <div className="relative">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-lumi-muted" />
         <input className="input-field pl-11" placeholder="Пошук по клієнту, майстру, послузі..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
@@ -244,7 +368,7 @@ function BookingsTab({ bookings, searchQuery, setSearchQuery, updateStatus, canc
                   <td className="font-semibold">{formatPrice(b.price)}</td>
                   <td><span className={getStatusBadgeClass(b.status)}>{getStatusLabel(b.status)}</span></td>
                   <td>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center">
                       {b.status === 'pending' && (
                         <button onClick={() => { updateStatus(b.id, 'confirmed'); toast.success('Підтверджено'); }} className="text-xs text-emerald-600 hover:text-emerald-800 font-medium">✓ Підтвердити</button>
                       )}
@@ -253,6 +377,11 @@ function BookingsTab({ bookings, searchQuery, setSearchQuery, updateStatus, canc
                       )}
                       {(b.status === 'pending' || b.status === 'confirmed') && (
                         <button onClick={() => { cancelBooking(b.id); toast.success('Скасовано'); }} className="text-xs text-red-400 hover:text-red-600 font-medium">✗ Скасувати</button>
+                      )}
+                      {b.status === 'cancelled' && (
+                        <button onClick={() => { deleteBooking(b.id); toast.success('Видалено'); }} className="text-xs text-red-400 hover:text-red-600 font-medium">
+                          <Trash2 className="w-3 h-3" />
+                        </button>
                       )}
                     </div>
                   </td>
@@ -659,7 +788,7 @@ function GalleryTab() {
             </div>
             <div className="sm:col-span-2">
               <label className="text-xs text-lumi-muted block mb-1">Опис фото</label>
-              <input className="input-field" placeholder="Наприклад: Французький манікюр" value={newPhoto.description} onChange={e => setNewPhoto(p => ({ ...p, description: e.target.value }))} />
+              <input className="input-field" placeholder="" value={newPhoto.description} onChange={e => setNewPhoto(p => ({ ...p, description: e.target.value }))} />
             </div>
           </div>
           <div className="flex gap-2">

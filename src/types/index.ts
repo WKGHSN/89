@@ -1,4 +1,4 @@
-// ============ USER TYPES ============
+
 export type UserRole = 'client' | 'master' | 'admin';
 
 export interface User {
@@ -11,7 +11,6 @@ export interface User {
   createdAt: string;
 }
 
-// ============ SERVICE TYPES ============
 export interface ServiceCategory {
   id: string;
   name: string;
@@ -27,12 +26,12 @@ export interface Service {
   categoryId: string;
   name: string;
   description?: string;
-  duration: number; // minutes
-  price: number; // UAH
+  duration: number; 
+  price: number; 
   isActive: boolean;
 }
 
-// ============ MASTER TYPES ============
+
 export interface Master {
   id: string;
   userId: string;
@@ -40,15 +39,15 @@ export interface Master {
   specializations: string[];
   bio: string;
   avatar: string;
-  experience: number; // years
+  experience: number; 
   rating: number;
   reviewsCount: number;
   isActive: boolean;
-  workingDays: number[]; // 0=Sun, 1=Mon, ...
+  workingDays: number[]; 
   workingHours: { start: string; end: string };
 }
 
-// ============ BOOKING TYPES ============
+
 export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 
 export interface Booking {
@@ -61,8 +60,8 @@ export interface Booking {
   serviceId: string;
   serviceName: string;
   categoryName: string;
-  date: string; // YYYY-MM-DD
-  time: string; // HH:MM
+  date: string; 
+  time: string; 
   duration: number;
   price: number;
   status: BookingStatus;
@@ -75,7 +74,7 @@ export interface TimeSlot {
   available: boolean;
 }
 
-// ============ REVIEW TYPES ============
+
 export interface Review {
   id: string;
   clientId: string;
@@ -90,7 +89,7 @@ export interface Review {
   createdAt: string;
 }
 
-// ============ GALLERY TYPES ============
+
 export interface GalleryItem {
   id: string;
   imageUrl: string;
@@ -102,7 +101,7 @@ export interface GalleryItem {
   createdAt: string;
 }
 
-// ============ CONTACT TYPES ============
+
 export interface ContactInfo {
   address: string;
   phone: string;
@@ -120,7 +119,7 @@ export interface ContactInfo {
   };
 }
 
-// ============ BOOKING FLOW TYPES ============
+
 export interface BookingState {
   step: number;
   selectedService: Service | null;
@@ -134,7 +133,7 @@ export interface BookingState {
   notes: string;
 }
 
-// ============ AUTH TYPES ============
+
 export interface AuthUser {
   id: string;
   name: string;

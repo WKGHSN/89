@@ -18,7 +18,7 @@ const NAV_LINKS = [
   { href: '/contacts', label: 'Контакти' },
 ];
 
-// Винесено з компонента — чиста функція, легко тестувати
+
 const getDashboardLink = (user: AuthUser | null): string => {
   if (!user) return '/auth/login';
   const routes: Record<string, string> = {
@@ -84,7 +84,7 @@ export default function Header() {
 
   const { isDark, toggleTheme } = useThemeStore();
 
-  // Виправлено: використовуємо селектор замість методу стору
+  
   const unreadCount = useNotificationsStore(selectUnreadCount);
 
   useEffect(() => { setMounted(true); }, []);
@@ -95,7 +95,7 @@ export default function Header() {
   }, []);
   useEffect(() => { setIsMobileMenuOpen(false); }, [pathname]);
 
-  // null до mounted щоб уникнути hydration mismatch
+  
   const currentUser = mounted ? user : null;
 
   const handleLogout = () => {
@@ -127,7 +127,7 @@ export default function Header() {
               </span>
             </Link>
 
-            {/* Desktop Navigation */}
+            {}
             <nav className="hidden lg:flex items-center gap-1">
               {NAV_LINKS.map((link) => (
                 <Link
@@ -145,7 +145,7 @@ export default function Header() {
               ))}
             </nav>
 
-            {/* Desktop Actions */}
+            {}
             <div className="hidden lg:flex items-center gap-3">
               {currentUser ? (
                 <div className="relative">
@@ -174,7 +174,7 @@ export default function Header() {
                 <Link href="/auth/login" className="btn-ghost text-sm">Увійти</Link>
               )}
 
-              {/* Перемикач теми */}
+              {}
               <button
                 onClick={toggleTheme}
                 className="w-9 h-9 flex items-center justify-center rounded-full hover:bg-lumi-cream transition-colors"
@@ -185,7 +185,7 @@ export default function Header() {
                   : <Moon className="w-4 h-4 text-lumi-muted" />}
               </button>
 
-              {/* Нотифікації — тільки для клієнтів */}
+              {}
               {currentUser?.role === 'client' && (
                 <Link
                   href="/dashboard/client"
@@ -204,7 +204,7 @@ export default function Header() {
               <Link href={bookingHref} className="btn-primary">Записатись</Link>
             </div>
 
-            {/* Mobile Menu Button */}
+            {}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="lg:hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-lumi-cream transition-colors"
@@ -217,7 +217,7 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {}
         {isMobileMenuOpen && (
           <div className="lg:hidden bg-white border-t border-lumi-border animate-fade-in">
             <div className="page-container py-4">
@@ -259,10 +259,10 @@ export default function Header() {
         )}
       </header>
 
-      {/* Spacer */}
+      {}
       <div className="h-16 md:h-18" />
 
-      {/* Overlay для закриття user menu кліком поза ним */}
+      {}
       {isUserMenuOpen && (
         <div className="fixed inset-0 z-40" onClick={() => setIsUserMenuOpen(false)} />
       )}

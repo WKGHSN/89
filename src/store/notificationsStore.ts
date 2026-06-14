@@ -30,8 +30,6 @@ interface NotificationsStore {
   createStatusChange: (booking: Booking) => void;
 }
 
-// Використання: const count = useNotificationsStore(selectUnreadCount)
-// Zustand перераховує тільки при зміні notifications — ефективніше ніж метод стору
 export const selectUnreadCount = (s: NotificationsStore) =>
   s.notifications.filter((n) => !n.isRead).length;
 
@@ -49,7 +47,7 @@ const buildNotification = (
   createdAt: new Date().toISOString(),
 });
 
-// ============ STORE ============
+
 export const useNotificationsStore = create<NotificationsStore>((set, get) => ({
   notifications: [],
 
@@ -74,7 +72,7 @@ export const useNotificationsStore = create<NotificationsStore>((set, get) => ({
     });
   },
 
-  // Видалення окремої нотифікації (раніше було відсутнє)
+  
   removeNotification: (id) => {
     set({
       notifications: get().notifications.filter((n) => n.id !== id),
@@ -84,7 +82,7 @@ export const useNotificationsStore = create<NotificationsStore>((set, get) => ({
   clearAll: () => set({ notifications: [] }),
 
 
-  // Підтвердження — викликати одразу після успішного бронювання
+  
   createBookingConfirmation: (booking) => {
     get().addNotification({
       type: 'confirmation',
@@ -94,7 +92,7 @@ export const useNotificationsStore = create<NotificationsStore>((set, get) => ({
     });
   },
 
-  // Скасування — викликати після cancelBooking()
+  
   createBookingCancellation: (booking) => {
     get().addNotification({
       type: 'cancellation',
@@ -104,7 +102,7 @@ export const useNotificationsStore = create<NotificationsStore>((set, get) => ({
     });
   },
 
-  // Зміна статусу — викликати після updateStatus()
+  
   createStatusChange: (booking) => {
     const statusLabels: Record<string, string> = {
       confirmed: 'підтверджено ✅',

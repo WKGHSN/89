@@ -39,7 +39,7 @@
 }
 
 @layer components {
-  /* ===== BUTTONS ===== */
+
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 px-6 py-3 
            bg-lumi-rose text-white font-medium rounded-full 
@@ -68,7 +68,7 @@
            active:scale-95 transition-all duration-200 text-sm;
   }
 
-  /* ===== CARDS ===== */
+
   .card {
     @apply bg-white rounded-3xl shadow-card overflow-hidden transition-all duration-300;
   }
@@ -77,7 +77,7 @@
     @apply card hover:shadow-hover hover:-translate-y-1;
   }
 
-  /* ===== INPUTS ===== */
+ 
   .input-field {
     @apply w-full px-4 py-3 bg-lumi-milk border border-lumi-border rounded-2xl
            text-lumi-text placeholder-lumi-muted text-sm
@@ -85,7 +85,7 @@
            transition-all duration-200;
   }
 
-  /* ===== SECTION HEADER ===== */
+  
   .section-tag {
     @apply inline-block text-xs font-semibold uppercase tracking-widest 
            text-lumi-rose bg-lumi-blush/30 px-4 py-1.5 rounded-full mb-4;
@@ -99,7 +99,6 @@
     @apply text-lumi-muted text-base md:text-lg leading-relaxed mt-4 max-w-2xl;
   }
 
-  /* ===== BADGES ===== */
   .badge {
     @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium;
   }
@@ -109,7 +108,7 @@
   .badge-completed { @apply bg-blue-50 text-blue-700 border border-blue-200; }
   .badge-cancelled { @apply bg-red-50 text-red-600 border border-red-200; }
 
-  /* ===== STARS ===== */
+
   .star-rating {
     @apply flex gap-0.5;
   }
@@ -117,17 +116,15 @@
   .star-filled { @apply text-amber-400; }
   .star-empty { @apply text-gray-200; }
 
-  /* ===== PAGE CONTAINER ===== */
   .page-container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
-  /* ===== SECTION ===== */
   .section {
     @apply py-16 md:py-24;
   }
 
-  /* ===== SIDEBAR NAV ===== */
+
   .sidebar-nav-item {
     @apply flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium
            text-lumi-muted hover:bg-lumi-cream hover:text-lumi-text cursor-pointer
@@ -138,12 +135,12 @@
     @apply bg-lumi-blush/40 text-lumi-deeprose;
   }
 
-  /* ===== AVATAR ===== */
+
   .avatar {
     @apply rounded-full object-cover;
   }
 
-  /* ===== DIVIDER ===== */
+ 
   .divider {
     @apply border-t border-lumi-border;
   }
@@ -152,7 +149,7 @@
 @layer utilities {
   .text-balance { text-wrap: balance; }
 
-  /* Gradient backgrounds */
+
   .bg-lumi-gradient {
     background: linear-gradient(135deg, #FAFAF8 0%, #F5F0EB 50%, #EDE8E0 100%);
   }
@@ -161,19 +158,19 @@
     background: linear-gradient(135deg, #F2C4C4 0%, #D4848A 100%);
   }
 
-  /* Glass effect */
+  
   .glass {
     backdrop-filter: blur(12px);
     background: rgba(255, 255, 255, 0.85);
     border: 1px solid rgba(255, 255, 255, 0.5);
   }
 
-  /* Scrollbar */
+  
   .scrollbar-thin::-webkit-scrollbar { width: 4px; }
   .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
   .scrollbar-thin::-webkit-scrollbar-thumb { @apply bg-lumi-border rounded-full; }
 
-  /* Line clamp */
+  
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -189,13 +186,13 @@
   }
 }
 
-/* ===== CUSTOM SCROLLBAR ===== */
+
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #FAFAF8; }
 ::-webkit-scrollbar-thumb { background: #E8D5C4; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #D4848A; }
 
-/* ===== ANIMATIONS ===== */
+
 @keyframes shimmer {
   0% { background-position: -200px 0; }
   100% { background-position: calc(200px + 100%) 0; }
@@ -207,7 +204,7 @@
   background-size: 200px 100%;
 }
 
-/* ===== CALENDAR STYLES ===== */
+
 .calendar-day {
   @apply w-10 h-10 flex items-center justify-center rounded-full text-sm
          cursor-pointer transition-all duration-150;
@@ -233,7 +230,7 @@
   @apply text-lumi-border cursor-not-allowed opacity-40;
 }
 
-/* ===== TIME SLOT STYLES ===== */
+
 .time-slot {
   @apply px-4 py-2.5 rounded-2xl border text-sm font-medium transition-all duration-150;
 }
@@ -250,13 +247,13 @@
   @apply border-lumi-border/50 text-lumi-border bg-gray-50 cursor-not-allowed opacity-60;
 }
 
-/* ===== MODAL OVERLAY ===== */
+
 .modal-overlay {
   @apply fixed inset-0 bg-black/30 backdrop-blur-sm z-50 
          flex items-center justify-center p-4;
 }
 
-/* ===== STEP INDICATOR ===== */
+
 .step-indicator {
   @apply flex items-center gap-2;
 }
@@ -269,7 +266,7 @@
 .step-dot.completed { @apply bg-lumi-rose; }
 .step-dot.inactive { @apply bg-lumi-border; }
 
-/* ===== ADMIN TABLE ===== */
+
 .admin-table {
   @apply w-full border-collapse;
 }
@@ -287,7 +284,7 @@
   @apply bg-lumi-milk;
 }
 
-/* ===== DARK MODE ===== */
+
 .dark {
   color-scheme: dark;
 }
@@ -331,7 +328,7 @@
 .dark .bg-lumi-text { background-color: #0f0a0d !important; }
 .dark header { background-color: rgba(26, 16, 23, 0.95) !important; }
 
-/* ===== MOBILE RESPONSIVE HELPERS ===== */
+
 @media (max-width: 640px) {
   .page-container {
     padding-left: 1rem;
@@ -343,24 +340,24 @@
     line-height: 1.2;
   }
 
-  /* Admin table scrollable on mobile */
+  
   .admin-table {
     min-width: 600px;
   }
 
-  /* Time slots – 3 columns on mobile */
+  
   .time-slot {
     padding: 0.5rem;
     font-size: 0.75rem;
   }
 }
 
-/* Ensure master avatar stays rounded in MasterCard on hover */
+
 .card-hover img.object-cover {
   border-radius: inherit;
 }
 
-/* Animate slide-up */
+
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -370,7 +367,7 @@
   animation: slideUp 0.4s ease-out;
 }
 
-/* Float animation */
+
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-6px); }

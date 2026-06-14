@@ -12,7 +12,7 @@ interface BookingWizardStore extends BookingState {
   setTime: (time: string) => void;
   setClientInfo: (info: Partial<ClientInfo>) => void;
   reset: () => void;
-  // Зручний геттер — чи заповнені всі обов'язкові поля перед підтвердженням
+
   isReadyToConfirm: () => boolean;
 }
 
@@ -35,9 +35,7 @@ const initialState: BookingState = {
   clientEmail: '',
   notes: '',
 };
-// Цей стор — тільки UI стан wizard-форми бронювання (крок 1-5)
-// Після підтвердження — дані передаються в bookingsStore.addBooking()
-// і wizard скидається через reset()
+
 export const useBookingWizardStore = create<BookingWizardStore>((set, get) => ({
   ...initialState,
 
@@ -47,7 +45,7 @@ export const useBookingWizardStore = create<BookingWizardStore>((set, get) => ({
 
   prevStep: () => set({ step: Math.max(1, get().step - 1) }),
 
-  // При зміні послуги — скидаємо все що нижче по воронці
+
   setService: (service, category) =>
     set({
       selectedService: service,
@@ -57,7 +55,6 @@ export const useBookingWizardStore = create<BookingWizardStore>((set, get) => ({
       selectedTime: null,
     }),
 
-  // При зміні майстра — скидаємо дату та час
   setMaster: (master) =>
     set({
       selectedMaster: master,
@@ -65,17 +62,16 @@ export const useBookingWizardStore = create<BookingWizardStore>((set, get) => ({
       selectedTime: null,
     }),
 
-  // При зміні дати — скидаємо час
+
   setDate: (date) => set({ selectedDate: date, selectedTime: null }),
 
   setTime: (time) => set({ selectedTime: time }),
 
-  // Виправлено: merge з попереднім станом щоб не затерти поля
+  
   setClientInfo: (info) => set((prev) => ({ ...prev, ...info })),
 
   reset: () => set(initialState),
 
-  // Перевірка перед фінальним кроком підтвердження
   isReadyToConfirm: () => {
     const { selectedService, selectedMaster, selectedDate, selectedTime, clientName, clientPhone } =
       get();

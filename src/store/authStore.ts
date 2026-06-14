@@ -122,7 +122,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     await new Promise((r) => setTimeout(r, 400));
 
     if (!EMAIL_REGEX.test(email)) {
-      set({ error: 'Введіть коректний email (наприклад: user@gmail.com)', isLoading: false });
+      set({ error: 'Введіть коректний email', isLoading: false });
       return false;
     }
 

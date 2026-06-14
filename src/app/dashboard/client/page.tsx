@@ -164,7 +164,6 @@ export default function ClientDashboard() {
   );
 }
 
-// ============ USER AVATAR — показує фото або ініціали ============
 function UserAvatar({ user, size = 'md' }: { user: AuthUser; size?: 'sm' | 'md' | 'lg' }) {
   const sizeClass = size === 'lg' ? 'w-14 h-14 text-xl' : size === 'md' ? 'w-10 h-10 text-base' : 'w-8 h-8 text-sm';
 
@@ -187,7 +186,6 @@ function UserAvatar({ user, size = 'md' }: { user: AuthUser; size?: 'sm' | 'md' 
   );
 }
 
-// ============ BOOKING CARD ============
 function BookingCard({ booking, onCancel, showCancel }: {
   booking: Booking;
   onCancel?: (id: string) => void;
@@ -229,7 +227,6 @@ function BookingCard({ booking, onCancel, showCancel }: {
   );
 }
 
-// ============ EMPTY STATE ============
 function EmptyState({ message, action }: { message: string; action?: React.ReactNode }) {
   return (
     <div className="bg-white rounded-2xl shadow-soft p-10 text-center">
@@ -240,7 +237,6 @@ function EmptyState({ message, action }: { message: string; action?: React.React
   );
 }
 
-// ============ PROFILE TAB ============
 function ProfileTab({ user }: { user: AuthUser }) {
   const { setHydrated } = useAuthStore();
   const updateUser = useAuthStore(s => s.user);
@@ -282,10 +278,9 @@ function ProfileTab({ user }: { user: AuthUser }) {
   };
 
   const handleSave = () => {
-    // Оновлюємо дані в localStorage через authStore
+
     const updated = { ...user, name, email, avatar };
     localStorage.setItem('lumibeauty-auth', JSON.stringify({ user: updated }));
-    // Перезавантажуємо стан
     setHydrated();
     toast.success('Профіль оновлено!');
   };
@@ -295,7 +290,7 @@ function ProfileTab({ user }: { user: AuthUser }) {
       <h2 className="font-serif font-medium text-lumi-text text-xl mb-4">Мій профіль</h2>
       <div className="bg-white rounded-2xl shadow-soft p-6">
 
-        {/* Avatar section */}
+        {}
         <div className="flex items-center gap-5 mb-6 pb-6 border-b border-lumi-border">
           <div className="relative group flex-shrink-0">
             {avatar ? (
@@ -312,7 +307,7 @@ function ProfileTab({ user }: { user: AuthUser }) {
               </div>
             )}
 
-            {/* Overlay для завантаження */}
+            {}
             <button
               onClick={() => fileInputRef.current?.click()}
               className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
@@ -321,7 +316,7 @@ function ProfileTab({ user }: { user: AuthUser }) {
               <Upload className="w-5 h-5 text-white" />
             </button>
 
-            {/* Кнопка видалення фото */}
+            {}
             {avatar && (
               <button
                 onClick={() => setAvatar(undefined)}

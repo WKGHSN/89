@@ -8,6 +8,7 @@ interface BookingsStore {
   bookings: Booking[];
   addBooking: (booking: Omit<Booking, 'id' | 'createdAt'>) => Booking;
   cancelBooking: (id: string) => void;
+  deleteBooking: (id: string) => void;
   updateStatus: (id: string, status: BookingStatus) => void;
   getBookingById: (id: string) => Booking | undefined;
   getUserBookings: (userId: string) => Booking[];
@@ -45,6 +46,10 @@ export const useBookingsStore = create<BookingsStore>()(
             b.id === id ? { ...b, status: 'cancelled' as BookingStatus } : b
           ),
         });
+      },
+
+      deleteBooking: (id) => {
+        set({ bookings: get().bookings.filter((b) => b.id !== id) });
       },
 
       updateStatus: (id, status) => {

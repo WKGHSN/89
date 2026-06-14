@@ -214,23 +214,23 @@ export const reviews: Review[] = [
 ];
 
 export const galleryItems: GalleryItem[] = [
-  // МАНІКЮР
+  
   { id: 'g-m1', imageUrl: '/gallery/manicure-1.jpg', categoryId: 'manicure', categoryName: 'Манікюр', masterName: 'Олена Ковальчук', description: 'Ніжний манікюр з натуральним покриттям', createdAt: '2024-08-01' },
   { id: 'g-m2', imageUrl: '/gallery/manicure-2.jpg', categoryId: 'manicure', categoryName: 'Манікюр', masterName: 'Олена Ковальчук', description: 'Стильний дизайн нігтів', createdAt: '2024-08-02' },
   { id: 'g-m3', imageUrl: '/gallery/manicure-3.jpg', categoryId: 'manicure', categoryName: 'Манікюр', masterName: 'Вікторія Лисенко', description: 'Класичний манікюр з гель-лаком', createdAt: '2024-08-03' },
   { id: 'g-m4', imageUrl: '/gallery/manicure-4.jpg', categoryId: 'manicure', categoryName: 'Манікюр', masterName: 'Вікторія Лисенко', description: 'Мінімалістичний nail-art', createdAt: '2024-08-04' },
   { id: 'g-m5', imageUrl: '/gallery/manicure-5.jpg', categoryId: 'manicure', categoryName: 'Манікюр', masterName: 'Олена Ковальчук', description: 'Французький манікюр', createdAt: '2024-08-05' },
 
-  // БРОВИ
+
   { id: 'g-b1', imageUrl: '/gallery/brows-1.jpg', categoryId: 'eyebrows', categoryName: 'Брови', masterName: 'Марина Бондаренко', description: 'Архітектура брів з фарбуванням', createdAt: '2024-08-06' },
   { id: 'g-b2', imageUrl: '/gallery/brows-2.jpg', categoryId: 'eyebrows', categoryName: 'Брови', masterName: 'Марина Бондаренко', description: 'Корекція та ламінування брів', createdAt: '2024-08-07' },
 
-  // ВІЇ
+  
   { id: 'g-l1', imageUrl: '/gallery/lashes-1.jpg', categoryId: 'lashes', categoryName: 'Вії', masterName: 'Марина Бондаренко', description: 'Класичне нарощування вій', createdAt: '2024-08-09' },
   { id: 'g-l2', imageUrl: '/gallery/lashes-2.jpg', categoryId: 'lashes', categoryName: 'Вії', masterName: 'Марина Бондаренко', description: "Об'ємне нарощування 2D", createdAt: '2024-08-10' },
   { id: 'g-l3', imageUrl: '/gallery/lashes-3.jpg', categoryId: 'lashes', categoryName: 'Вії', masterName: 'Марина Бондаренко', description: 'Ламінування та ботокс вій', createdAt: '2024-08-11' },
 
-  // СТРИЖКИ
+  
   { id: 'g-h1', imageUrl: '/gallery/haircut-1.jpg', categoryId: 'haircare', categoryName: 'Стрижки', masterName: 'Соломія Петренко', description: 'Жіноча стрижка з укладкою', createdAt: '2024-08-13' },
   { id: 'g-h2', imageUrl: '/gallery/haircut-2.jpg', categoryId: 'haircare', categoryName: 'Стрижки', masterName: 'Соломія Петренко', description: 'Каскадна стрижка', createdAt: '2024-08-14' },
 ];

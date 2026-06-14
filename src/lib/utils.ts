@@ -75,7 +75,7 @@ export function generateCalendarDays(year: number, month: number) {
   const lastDay = new Date(year, month + 1, 0);
   const daysInMonth = lastDay.getDate();
   let startDayOfWeek = firstDay.getDay();
-  // Convert to Monday-first (0=Mon...6=Sun)
+ 
   startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
 
   const days: (number | null)[] = [];

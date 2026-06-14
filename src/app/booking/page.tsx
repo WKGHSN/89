@@ -374,7 +374,7 @@ function Step5({ onConfirm }: { onConfirm: () => void }) {
   const validateEmail = (val: string): string => {
     if (!val) return 'Email є обов\'язковим';
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(val)) return 'Введіть коректний email (наприклад: user@gmail.com)';
+    if (!emailRegex.test(val)) return 'Введіть коректний email ';
     return '';
   };
 

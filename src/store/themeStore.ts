@@ -21,7 +21,7 @@ const getSavedTheme = (): boolean => {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) return saved === 'dark';
-    // Якщо немає збереженої теми — дивимось системні налаштування користувача
+    
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   } catch {
     return false;
@@ -42,7 +42,7 @@ export const useThemeStore = create<ThemeStore>((set, get) => ({
     set({ isDark: dark });
   },
 
-  // Виправлено: прибрано дублювання DOM-логіки — тепер через applyTheme()
+  
   setTheme: (dark) => {
     applyTheme(dark);
     set({ isDark: dark });

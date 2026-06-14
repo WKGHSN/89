@@ -19,7 +19,7 @@ function RegisterPageInner() {
   const validateEmailField = (val: string): string => {
     if (!val) return '';
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(val)) return 'Введіть коректний email (наприклад: user@gmail.com)';
+    if (!emailRegex.test(val)) return 'Введіть коректний email ';
     return '';
   };
 
